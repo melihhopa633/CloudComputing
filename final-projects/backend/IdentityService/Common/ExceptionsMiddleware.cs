@@ -23,7 +23,8 @@ namespace IdentityService.Common
             {
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = 500;
-                var result = JsonSerializer.Serialize(new { error = ex.Message });
+                var apiResponse = ApiResponse.Fail(ex.Message);
+                var result = JsonSerializer.Serialize(apiResponse);
                 await context.Response.WriteAsync(result);
             }
         }
