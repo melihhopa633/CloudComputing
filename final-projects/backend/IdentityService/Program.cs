@@ -51,10 +51,6 @@ builder.Services.AddAuthorization();
 // Add MediatR for CQRS
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-// OpenAPI
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
 // Apply migrations at startup
@@ -70,11 +66,6 @@ using (var scope = app.Services.CreateScope())
 // Use Exception Middleware
 app.UseMiddleware<ExceptionsMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
