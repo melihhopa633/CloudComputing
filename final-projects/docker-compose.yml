@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  identityservice:
+    build:
+      context: ./backend/IdentityService
+    container_name: identityservice
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=identity_db;Username=postgres;Password=postgres
+      - Jwt__Key=YourSuperSecretKeyHereChangeMe!
+      - Jwt__Issuer=IdentityService
+      - Jwt__Audience=IdentityServiceUsers
+      - Jwt__ExpireHours=2
+    ports:
+      - "5001:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: identity_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:

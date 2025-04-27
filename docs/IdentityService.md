@@ -1,36 +1,34 @@
-# IdentityService - Technical Specification
-
-This document defines the design and structure of the **IdentityService** for the Secure Systems & Secure Software Development Final Project.
-
----
+# IdentityService - Detailed Technical Specification
 
 ## 👉 Purpose
 
-IdentityService is responsible for:
+IdentityService is designed to securely manage:
 - User Registration
 - User Login (JWT Token generation)
 - Role and Permission Management
-- Multi-Factor Authentication (optional for future improvements)
+- Future Multi-Factor Authentication (MFA) integration
 
-Designed with a focus on security, scalability, and clean architecture principles.
+IdentityService supports the overall project goals of **authentication**, **authorization**, and **secure access control** under the Secure Systems & Secure Software Development Final Projects.
 
 ---
 
 ## 📆 Technology Stack
 
-| Component | Choice |
-|:----------|:--------|
+| Component | Technology |
+|:----------|:-----------|
 | Framework | .NET Core 8 Web API |
-| Routing | Carter (Minimal API + Clean Endpoints) |
+| API Design | Carter (Minimal API + Clean Endpoints) |
 | Architecture | CQRS (Command Query Responsibility Segregation) |
 | Authentication | JWT Bearer Tokens |
 | Database | PostgreSQL |
 | ORM | Entity Framework Core (EF Core) |
 | Validation | FluentValidation |
+| Password Hashing | BCrypt |
+| Docker | Fully containerized |
 
 ---
 
-## 🔧 Project Structure
+## 🔧 Project Folder Structure
 
 ```
 /IdentityService
@@ -38,17 +36,17 @@ Designed with a focus on security, scalability, and clean architecture principle
 ├── Program.cs
 ├── appsettings.json
 ├── /Features
-│   ├── /Register
+│   ├── /Authentication
 │   │   ├── RegisterCommand.cs
 │   │   ├── RegisterCommandHandler.cs
 │   │   ├── RegisterValidator.cs
-│   ├── /Login
 │   │   ├── LoginCommand.cs
 │   │   ├── LoginCommandHandler.cs
 │   │   ├── LoginValidator.cs
-│   ├── /Roles
-│   │   ├── CreateRoleCommand.cs
-│   │   ├── AssignRoleCommand.cs
+│
+├── /Roles
+│   ├── CreateRoleCommand.cs
+│   ├── AssignRoleCommand.cs
 │
 ├── /Entities
 │   ├── User.cs
@@ -57,7 +55,7 @@ Designed with a focus on security, scalability, and clean architecture principle
 │
 ├── /Persistence
 │   ├── AppDbContext.cs
-│   ├── Migrations/
+│   ├── PostgreSQL Migrations
 │
 ├── /Security
 │   ├── JwtService.cs
@@ -71,66 +69,88 @@ Designed with a focus on security, scalability, and clean architecture principle
 
 ## 🔍 API Endpoints
 
-Using **Carter** for clean endpoint definition with **CQRS** pattern.
-
 | HTTP Method | Endpoint | Purpose |
 |:------------|:---------|:--------|
 | POST | `/api/auth/register` | Register a new user |
 | POST | `/api/auth/login` | User login and receive JWT Token |
 | POST | `/api/roles/create` | Create a new role |
-| POST | `/api/roles/assign` | Assign a role to a user |
+| POST | `/api/roles/assign` | Assign an existing role to a user |
+
+All endpoints will be implemented through **Carter modules** following CQRS.
 
 ---
 
-## 🔒 Security
+## 🔒 Authentication and Security
 
-- Passwords are hashed with a strong hashing algorithm (e.g., BCrypt or PBKDF2).
-- JWT tokens are signed using a secure private key.
-- Role-based Authorization will be applied.
-- Rate limiting can optionally be enforced via SecurityGateway.
-
----
-
-## 📚 Database Schema (PostgreSQL)
-
-### Tables
-
-- **Users**
-  - Id (PK)
-  - Username
-  - Email
-  - PasswordHash
-  - CreatedAt
-
-- **Roles**
-  - Id (PK)
-  - RoleName
-
-- **UserRoles**
-  - Id (PK)
-  - UserId (FK)
-  - RoleId (FK)
+- Passwords will be stored using **BCrypt** hashing.
+- JWTs will include claims for UserId, Username, and Roles.
+- Tokens will be signed with a strong asymmetric key pair (private/public keys).
+- Sensitive endpoints will require authorization with appropriate role checks.
+- Standard middleware for exception handling and logging will be included.
 
 ---
 
-## 🔄 CQRS Flow Example (User Registration)
+## 📈 Database Schema (PostgreSQL)
 
-1. User submits a POST request to `/api/auth/register`.
-2. Carter maps the request to `RegisterCommand`.
-3. `RegisterCommandHandler` validates and processes registration.
-4. `AppDbContext` saves new user into PostgreSQL.
-5. `ApiResponse` object returns success message.
+### Users Table
+| Column | Type | Description |
+|:-------|:-----|:-------------|
+| Id | UUID | Primary Key |
+| Username | VARCHAR(255) | Unique username |
+| Email | VARCHAR(255) | Unique email address |
+| PasswordHash | TEXT | Encrypted password hash |
+| CreatedAt | TIMESTAMP | Registration timestamp |
+
+### Roles Table
+| Column | Type | Description |
+|:-------|:-----|:-------------|
+| Id | UUID | Primary Key |
+| RoleName | VARCHAR(100) | Unique role name |
+
+### UserRoles Table
+| Column | Type | Description |
+|:-------|:-----|:-------------|
+| Id | UUID | Primary Key |
+| UserId | UUID | Foreign Key (Users) |
+| RoleId | UUID | Foreign Key (Roles) |
 
 ---
 
-## 📈 Key Benefits
+## 🔄 CQRS Flow Examples
 
-- **Clean structure** using CQRS: easy maintenance and testability.
-- **Minimal API style** with Carter: fewer controllers, simpler routes.
-- **High Security**: JWT, hashed passwords, role-based authorization.
-- **Docker-ready**: Integrated with docker-compose.yml for containerized deployment.
+### User Registration Flow
+1. User sends POST `/api/auth/register` with username, email, and password.
+2. Request is mapped to `RegisterCommand`.
+3. `RegisterCommandHandler` validates and processes the registration.
+4. Password is hashed.
+5. User record is saved into PostgreSQL.
+6. `ApiResponse` returns success status.
+
+### User Login Flow
+1. User sends POST `/api/auth/login` with credentials.
+2. `LoginCommandHandler` verifies the password.
+3. JWT Token is generated with roles.
+4. Token is returned to the user.
 
 ---
 
-# 🚀 IdentityService Ready to Secure Authentication!
+## 📅 Deployment Details
 
+- Docker container configured to expose IdentityService on internal port 5001.
+- Connected to a PostgreSQL container managed by docker-compose.
+- JWT Secret Key loaded from environment variables.
+
+---
+
+## 🚀 Key Advantages
+
+- Clean, Minimal API development via Carter
+- Separation of concerns and scalability using CQRS
+- Industry-standard authentication via JWT
+- Highly secure user password management
+- Full dockerization for portability and deployment
+- PostgreSQL relational database for stable, relational data storage
+
+---
+
+# 🚀 IdentityService - Secure Authentication Built the Right Way!
