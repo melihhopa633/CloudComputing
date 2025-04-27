@@ -5,6 +5,8 @@ using IdentityService.Common;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using IdentityService.Features.Register;
+using IdentityService.Features.Login;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,9 +24,6 @@ builder.Services.AddFluentValidationAutoValidation();
 // Add JWT Service
 builder.Services.AddSingleton<JwtService>(sp =>
     new JwtService(builder.Configuration["Jwt:Key"]!));
-
-// Add Exception Middleware
-builder.Services.AddTransient<ExceptionsMiddleware>();
 
 // Add Authentication
 builder.Services.AddAuthentication(options =>
@@ -48,11 +47,25 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// Register command handlers for DI
+builder.Services.AddTransient<RegisterCommandHandler>();
+builder.Services.AddTransient<LoginCommandHandler>();
+
 // OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Apply migrations at startup
+MigrationManager.ApplyMigrations(app);
+
+// Seed the database
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbSeeder.Seed(dbContext);
+}
 
 // Use Exception Middleware
 app.UseMiddleware<ExceptionsMiddleware>();

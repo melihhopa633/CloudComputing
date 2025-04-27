@@ -1,9 +1,12 @@
+using System;
+using System.Collections.Generic;
+
 namespace IdentityService.Entities
 {
     public class Role
     {
-        public int Id { get; set; }
-        public string RoleName { get; set; }
-        public ICollection<UserRole> UserRoles { get; set; }
+        public Guid Id { get; set; } // Use Guid for PK as per spec
+        public required string RoleName { get; set; }
+        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }
 }

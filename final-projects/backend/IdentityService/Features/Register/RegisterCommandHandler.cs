@@ -3,6 +3,7 @@ using IdentityService.Persistence;
 using IdentityService.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace IdentityService.Features.Register
 {
@@ -25,7 +26,8 @@ namespace IdentityService.Features.Register
                 Username = command.Username,
                 Email = command.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(command.Password),
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                UserRoles = new List<UserRole>()
             };
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
