@@ -25,6 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Features\User\CreateUser\" />
+    <Folder Include="Features\User\DeleteUser\" />
+    <Folder Include="Features\User\GetAllUser\" />
+    <Folder Include="Features\User\GetUser\" />
+    <Folder Include="Features\User\UpdateUser\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
