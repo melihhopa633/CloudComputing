@@ -1,9 +1,12 @@
+using MediatR;
+using IdentityService.Common;
+
 namespace IdentityService.Features.Register
 {
-    public class RegisterCommand
+    public class RegisterCommand : IRequest<ApiResponse>
     {
-        public string Username { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public required string Username { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
     }
 }

@@ -4,22 +4,24 @@ using IdentityService.Common;
 using IdentityService.Security;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using MediatR;
 
 namespace IdentityService.Features.Login
 {
-    public class LoginCommandHandler
+    public class LoginCommandHandler : IRequestHandler<LoginCommand, ApiResponse>
     {
-        private readonly AppDbContext _dbContext;
+        private readonly IRepository<User> _userRepository;
         private readonly JwtService _jwtService;
-        public LoginCommandHandler(AppDbContext dbContext, JwtService jwtService)
+        public LoginCommandHandler(IRepository<User> userRepository, JwtService jwtService)
         {
-            _dbContext = dbContext;
+            _userRepository = userRepository;
             _jwtService = jwtService;
         }
 
-        public async Task<ApiResponse> Handle(LoginCommand command)
+        public async Task<ApiResponse> Handle(LoginCommand command, CancellationToken cancellationToken)
         {
-            var user = await _dbContext.Users.Include(u => u.UserRoles).ThenInclude(ur => ur.Role).FirstOrDefaultAsync(u => u.Email == command.Email);
+            var users = await _userRepository.FindAsync(u => u.Email == command.Email);
+            var user = users.FirstOrDefault();
             if (user == null || !BCrypt.Net.BCrypt.Verify(command.Password, user.PasswordHash))
                 return ApiResponse.Fail("Invalid credentials.");
 

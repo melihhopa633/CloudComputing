@@ -4,21 +4,22 @@ using IdentityService.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using MediatR;
 
 namespace IdentityService.Features.Register
 {
-    public class RegisterCommandHandler
+    public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ApiResponse>
     {
-        private readonly AppDbContext _dbContext;
-        public RegisterCommandHandler(AppDbContext dbContext)
+        private readonly IRepository<User> _userRepository;
+        public RegisterCommandHandler(IRepository<User> userRepository)
         {
-            _dbContext = dbContext;
+            _userRepository = userRepository;
         }
 
-        public async Task<ApiResponse> Handle(RegisterCommand command)
+        public async Task<ApiResponse> Handle(RegisterCommand command, CancellationToken cancellationToken)
         {
-            // Check if user exists
-            if (await _dbContext.Users.AnyAsync(u => u.Email == command.Email))
+            var existingUsers = await _userRepository.FindAsync(u => u.Email == command.Email);
+            if (existingUsers.Any())
                 return ApiResponse.Fail("Email already registered.");
 
             var user = new User
@@ -29,8 +30,8 @@ namespace IdentityService.Features.Register
                 CreatedAt = DateTime.UtcNow,
                 UserRoles = new List<UserRole>()
             };
-            _dbContext.Users.Add(user);
-            await _dbContext.SaveChangesAsync();
+            await _userRepository.AddAsync(user);
+            await _userRepository.SaveChangesAsync();
             return ApiResponse.SuccessResponse("User registered successfully.");
         }
     }

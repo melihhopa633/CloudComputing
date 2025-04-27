@@ -7,6 +7,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using IdentityService.Features.Register;
 using IdentityService.Features.Login;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,9 +48,15 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// Register command handlers for DI
+// Register generic repository for DI
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Register CQRS command handlers for DI
 builder.Services.AddTransient<RegisterCommandHandler>();
 builder.Services.AddTransient<LoginCommandHandler>();
+
+// Add MediatR for CQRS
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 // OpenAPI
 builder.Services.AddEndpointsApiExplorer();
