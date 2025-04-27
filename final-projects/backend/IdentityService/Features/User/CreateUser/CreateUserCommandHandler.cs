@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using IdentityService.Persistence;
-using IdentityService.Entities;
 
 namespace IdentityService.Features.User.CreateUser
 {
@@ -25,7 +24,7 @@ namespace IdentityService.Features.User.CreateUser
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
                 CreatedAt = DateTime.UtcNow,
-                UserRoles = new System.Collections.Generic.List<UserRole>()
+                UserRoles = new System.Collections.Generic.List<Entities.UserRole>()
             };
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
