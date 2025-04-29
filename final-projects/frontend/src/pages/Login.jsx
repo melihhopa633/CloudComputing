@@ -29,23 +29,29 @@ const Login = () => {
         <h2 className="login-title">Sign In</h2>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
+            <label className="input-label" htmlFor="email">Email</label>
             <input
+              id="email"
               type="email"
-              placeholder="Email"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               className="glass-input"
+              autoComplete="username"
             />
           </div>
           <div className="input-group">
+            <label className="input-label" htmlFor="password">Password</label>
             <input
+              id="password"
               type="password"
-              placeholder="Password"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               className="glass-input"
+              autoComplete="current-password"
             />
           </div>
           <button type="submit" className="glass-btn">Login</button>
@@ -57,3 +63,5 @@ const Login = () => {
 };
 
 export default Login;
+
+
