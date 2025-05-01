@@ -3,11 +3,11 @@ import { DataGrid } from '@mui/x-data-grid';
 import { Typography, Box, IconButton, Tooltip } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
-const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
+const RoleDataGrid = ({ roles, loading, onEdit, onDelete }) => {
     const columns = [
         {
-            field: 'username',
-            headerName: 'Username',
+            field: 'roleName',
+            headerName: 'Role Name',
             width: 200,
             renderCell: (params) => (
                 <Typography variant="body2" sx={{
@@ -20,15 +20,15 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
             )
         },
         {
-            field: 'email',
-            headerName: 'Email',
-            width: 250,
+            field: 'userRoles',
+            headerName: 'Assigned Users',
+            width: 300,
             renderCell: (params) => (
                 <Typography variant="body2" sx={{
                     color: '#00B4FF',
                     textShadow: '0 0 10px rgba(0, 180, 255, 0.3)',
                 }}>
-                    {params.value}
+                    {params.value.length} users
                 </Typography>
             )
         },
@@ -42,7 +42,7 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
                     fontWeight: 500,
                     textShadow: '0 0 10px rgba(0, 153, 255, 0.3)',
                 }}>
-                    {params.value}
+                    {new Date(params.value).toLocaleDateString()}
                 </Typography>
             )
         },
@@ -52,7 +52,7 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
             width: 150,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Tooltip title="Edit user">
+                    <Tooltip title="Edit role">
                         <IconButton
                             size="small"
                             onClick={() => onEdit(params.row)}
@@ -68,7 +68,7 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
                             <EditIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete user">
+                    <Tooltip title="Delete role">
                         <IconButton
                             size="small"
                             onClick={() => onDelete(params.row.id)}
@@ -91,7 +91,7 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
 
     return (
         <DataGrid
-            rows={users}
+            rows={roles}
             columns={columns}
             pageSize={10}
             rowsPerPageOptions={[10]}
@@ -172,4 +172,4 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
     );
 };
 
-export default UserDataGrid; 
+export default RoleDataGrid; 

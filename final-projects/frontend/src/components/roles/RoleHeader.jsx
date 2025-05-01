@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Button, IconButton, Tooltip } from '@mui/material';
 import { Add as AddIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 
-const UserHeader = ({ onRefresh, onAddUser }) => {
+const RoleHeader = ({ onRefresh, onAddRole }) => {
     return (
         <Box sx={{
             display: 'flex',
@@ -11,7 +11,6 @@ const UserHeader = ({ onRefresh, onAddUser }) => {
             mb: 3,
             pb: 2,
             borderBottom: '1px solid rgba(0, 102, 255, 0.2)',
-            backgroundColor: 'transparent'
         }}>
             <Typography variant="h4" sx={{
                 fontWeight: 700,
@@ -20,10 +19,10 @@ const UserHeader = ({ onRefresh, onAddUser }) => {
                 WebkitTextFillColor: 'transparent',
                 textShadow: '0 0 20px rgba(0, 102, 255, 0.3)',
             }}>
-                User Management
+                Role Management
             </Typography>
             <Box sx={{ display: 'flex', gap: 2 }}>
-                <Tooltip title="Refresh users">
+                <Tooltip title="Refresh roles">
                     <IconButton
                         onClick={onRefresh}
                         sx={{
@@ -41,7 +40,7 @@ const UserHeader = ({ onRefresh, onAddUser }) => {
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
-                    onClick={onAddUser}
+                    onClick={onAddRole}
                     sx={{
                         background: 'linear-gradient(45deg, #0066FF, #00B4FF)',
                         '&:hover': {
@@ -51,11 +50,11 @@ const UserHeader = ({ onRefresh, onAddUser }) => {
                         boxShadow: '0 0 15px rgba(0, 102, 255, 0.3)',
                     }}
                 >
-                    Add User
+                    Add Role
                 </Button>
             </Box>
         </Box>
     );
 };
 
-export default UserHeader; 
+export default RoleHeader; 

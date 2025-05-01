@@ -1,9 +1,9 @@
 import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Typography, Box, IconButton, Tooltip } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 
-const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
+const UserRoleDataGrid = ({ userRoles, loading, onDelete }) => {
     const columns = [
         {
             field: 'username',
@@ -20,9 +20,9 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
             )
         },
         {
-            field: 'email',
-            headerName: 'Email',
-            width: 250,
+            field: 'roleName',
+            headerName: 'Role',
+            width: 200,
             renderCell: (params) => (
                 <Typography variant="body2" sx={{
                     color: '#00B4FF',
@@ -33,42 +33,12 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
             )
         },
         {
-            field: 'createdAt',
-            headerName: 'Created At',
-            width: 200,
-            renderCell: (params) => (
-                <Typography variant="body2" sx={{
-                    color: '#0099FF',
-                    fontWeight: 500,
-                    textShadow: '0 0 10px rgba(0, 153, 255, 0.3)',
-                }}>
-                    {params.value}
-                </Typography>
-            )
-        },
-        {
             field: 'actions',
             headerName: 'Actions',
-            width: 150,
+            width: 100,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Tooltip title="Edit user">
-                        <IconButton
-                            size="small"
-                            onClick={() => onEdit(params.row)}
-                            sx={{
-                                color: '#0066FF',
-                                '&:hover': {
-                                    backgroundColor: 'rgba(0, 102, 255, 0.1)',
-                                    transform: 'scale(1.2)',
-                                    transition: 'all 0.3s ease',
-                                },
-                            }}
-                        >
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete user">
+                    <Tooltip title="Remove role">
                         <IconButton
                             size="small"
                             onClick={() => onDelete(params.row.id)}
@@ -91,7 +61,7 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
 
     return (
         <DataGrid
-            rows={users}
+            rows={userRoles}
             columns={columns}
             pageSize={10}
             rowsPerPageOptions={[10]}
@@ -102,58 +72,57 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
                 border: 'none',
                 background: 'rgba(0, 20, 40, 0.7)',
                 backdropFilter: 'blur(10px)',
-                '& .MuiDataGrid-main': {
-                    backgroundColor: 'transparent',
-                },
                 '& .MuiDataGrid-cell': {
                     borderBottom: '1px solid rgba(0, 102, 255, 0.1)',
                     transition: 'all 0.3s ease',
-                    backgroundColor: 'transparent !important',
-                    color: '#fff',
                     '&:hover': {
-                        backgroundColor: 'rgba(0, 102, 255, 0.1) !important',
+                        backgroundColor: 'rgba(0, 102, 255, 0.1)',
                         transform: 'scale(1.02)',
                     },
                 },
                 '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: '#001427',
+                    backgroundColor: 'rgba(0, 20, 40, 0.9)',
                     borderBottom: '1px solid rgba(0, 102, 255, 0.2)',
                     color: '#0066FF',
                     fontWeight: 700,
-                },
-                '& .MuiDataGrid-columnHeaderTitle': {
-                    color: '#0066FF',
-                    fontWeight: 700,
-                },
-                '& .MuiDataGrid-columnHeader': {
-                    backgroundColor: '#001427',
+                    transition: 'all 0.3s ease',
                     '&:hover': {
-                        backgroundColor: '#001f3d',
-                    },
-                    '&:focus': {
-                        backgroundColor: '#001427',
+                        backgroundColor: 'rgba(0, 102, 255, 0.1)',
                     },
                 },
                 '& .MuiDataGrid-row': {
-                    backgroundColor: 'rgba(0, 20, 40, 0.5) !important',
+                    backgroundColor: 'rgba(0, 20, 40, 0.5)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
-                        backgroundColor: 'rgba(0, 102, 255, 0.1) !important',
+                        backgroundColor: 'rgba(0, 102, 255, 0.1)',
                         transform: 'scale(1.01)',
                     },
                 },
-                '& .MuiDataGrid-footerContainer': {
-                    backgroundColor: 'rgba(0, 20, 40, 0.9)',
-                    borderTop: '1px solid rgba(0, 102, 255, 0.2)',
+                '& .MuiDataGrid-cell:focus': {
+                    outline: 'none',
                 },
-                '& .MuiDataGrid-virtualScroller': {
-                    backgroundColor: 'transparent',
+                '& .MuiDataGrid-cell:focus-within': {
+                    outline: 'none',
                 },
-                '& .MuiCheckbox-root': {
+                '& .MuiDataGrid-columnHeader:focus': {
+                    outline: 'none',
+                },
+                '& .MuiDataGrid-columnHeader:focus-within': {
+                    outline: 'none',
+                },
+                '& .MuiDataGrid-columnHeaderTitle': {
+                    fontWeight: 700,
+                },
+                '& .MuiTablePagination-root': {
                     color: '#0066FF',
                 },
-                '& .MuiDataGrid-columnSeparator': {
-                    color: 'rgba(0, 102, 255, 0.2)',
+                '& .MuiIconButton-root': {
+                    color: '#0066FF',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                        transform: 'scale(1.2)',
+                        color: '#00B4FF',
+                    },
                 },
                 '& .MuiDataGrid-menuIcon': {
                     color: '#0066FF',
@@ -161,15 +130,29 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
                 '& .MuiDataGrid-sortIcon': {
                     color: '#0066FF',
                 },
-                '& .MuiDataGrid-iconButtonContainer': {
-                    backgroundColor: 'transparent',
+                '& .MuiDataGrid-checkboxInput': {
+                    color: '#0066FF',
                 },
-                '& .MuiDataGrid-iconSeparator': {
-                    color: 'rgba(0, 102, 255, 0.2)',
-                }
+                '& .MuiDataGrid-virtualScroller': {
+                    '&::-webkit-scrollbar': {
+                        width: '8px',
+                        height: '8px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        background: 'rgba(0, 20, 40, 0.5)',
+                        borderRadius: '4px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        background: 'rgba(0, 102, 255, 0.5)',
+                        borderRadius: '4px',
+                        '&:hover': {
+                            background: 'rgba(0, 102, 255, 0.7)',
+                        },
+                    },
+                },
             }}
         />
     );
 };
 
-export default UserDataGrid; 
+export default UserRoleDataGrid; 

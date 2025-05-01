@@ -1,93 +1,158 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Paper,
-  Typography,
-  Chip,
-} from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import { Add as AddIcon } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import { Box, Paper } from '@mui/material';
+import { keyframes } from '@mui/system';
+import roleService from '../services/roleService';
+import Swal from 'sweetalert2';
+import RoleHeader from '../components/roles/RoleHeader';
+import RoleDataGrid from '../components/roles/RoleDataGrid';
+import RoleDialog from '../components/roles/RoleDialog';
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 
 const RolesPage = () => {
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
   const [newRole, setNewRole] = useState({
-    name: '',
-    description: '',
+    roleName: '',
+  });
+  const [editRole, setEditRole] = useState({
+    roleName: '',
   });
 
-  // Dummy data for demonstration
-  const rows = [
-    { 
-      id: 1, 
-      name: 'Admin', 
-      description: 'Full system access', 
-      users: ['john_doe', 'admin_user'],
-      createdAt: '2025-05-01' 
-    },
-    { 
-      id: 2, 
-      name: 'User', 
-      description: 'Regular user access', 
-      users: ['jane_smith'],
-      createdAt: '2025-05-01' 
-    },
-    { 
-      id: 3, 
-      name: 'Moderator', 
-      description: 'Content management access', 
-      users: [],
-      createdAt: '2025-05-01' 
-    },
-  ];
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
-  const columns = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'name', headerName: 'Role Name', width: 150 },
-    { field: 'description', headerName: 'Description', width: 200 },
-    {
-      field: 'users',
-      headerName: 'Assigned Users',
-      width: 300,
-      renderCell: (params) => (
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {params.value.map((user) => (
-            <Chip key={user} label={user} size="small" />
-          ))}
-        </Box>
-      ),
-    },
-    { field: 'createdAt', headerName: 'Created At', width: 200 },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 200,
-      renderCell: (params) => (
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            style={{ marginRight: 8 }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            size="small"
-          >
-            Delete
-          </Button>
-        </Box>
-      ),
-    },
-  ];
+  const showSuccessAlert = (title, message) => {
+    Swal.fire({
+      title: title,
+      text: message,
+      icon: 'success',
+      confirmButtonColor: '#0066FF',
+      background: 'rgba(0, 20, 40, 0.95)',
+      color: '#fff',
+      backdrop: 'rgba(0, 0, 0, 0.7)',
+      timer: 2000,
+      timerProgressBar: true,
+      customClass: {
+        title: 'swal2-title',
+        content: 'swal2-content',
+        confirmButton: 'swal2-confirm',
+      },
+      buttonsStyling: false,
+      confirmButtonText: 'OK',
+      width: '400px',
+      padding: '2rem',
+      titleText: title,
+      html: `<div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>`,
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
+      },
+      confirmButtonClass: 'swal2-confirm-button',
+      customClass: {
+        confirmButton: 'swal2-confirm-button',
+      },
+      html: `
+        <div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>
+        <style>
+          .swal2-confirm-button {
+            background: linear-gradient(45deg, #0066FF, #00B4FF) !important;
+            border: none !important;
+            color: white !important;
+            padding: 10px 30px !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.4) !important;
+            transition: all 0.3s ease !important;
+          }
+          .swal2-confirm-button:hover {
+            background: linear-gradient(45deg, #0055DD, #0099FF) !important;
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.6) !important;
+            transform: translateY(-2px) !important;
+          }
+        </style>
+      `,
+    });
+  };
+
+  const showErrorAlert = (title, message) => {
+    Swal.fire({
+      title: title,
+      text: message,
+      icon: 'error',
+      confirmButtonColor: '#0066FF',
+      background: 'rgba(0, 20, 40, 0.95)',
+      color: '#fff',
+      backdrop: 'rgba(0, 0, 0, 0.7)',
+      customClass: {
+        title: 'swal2-title',
+        content: 'swal2-content',
+        confirmButton: 'swal2-confirm',
+      },
+      buttonsStyling: false,
+      confirmButtonText: 'OK',
+      width: '400px',
+      padding: '2rem',
+      titleText: title,
+      html: `<div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>`,
+      confirmButtonClass: 'swal2-confirm-button',
+      customClass: {
+        confirmButton: 'swal2-confirm-button',
+      },
+      html: `
+        <div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>
+        <style>
+          .swal2-confirm-button {
+            background: linear-gradient(45deg, #0066FF, #00B4FF) !important;
+            border: none !important;
+            color: white !important;
+            padding: 10px 30px !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.4) !important;
+            transition: all 0.3s ease !important;
+          }
+          .swal2-confirm-button:hover {
+            background: linear-gradient(45deg, #0055DD, #0099FF) !important;
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.6) !important;
+            transform: translateY(-2px) !important;
+          }
+        </style>
+      `,
+    });
+  };
+
+  const fetchRoles = async () => {
+    try {
+      setLoading(true);
+      const response = await roleService.getAll();
+      setRoles(response.data);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      showErrorAlert('Error', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -95,71 +160,182 @@ const RolesPage = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
-    setNewRole({ name: '', description: '' });
+    setNewRole({ roleName: '' });
   };
 
-  const handleCreateRole = () => {
-    // TODO: Implement role creation
-    console.log('Creating role:', newRole);
-    handleCloseDialog();
+  const handleOpenEditDialog = (role) => {
+    setSelectedRole(role);
+    setEditRole({
+      roleName: role.roleName,
+    });
+    setOpenEditDialog(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setOpenEditDialog(false);
+    setSelectedRole(null);
+    setEditRole({ roleName: '' });
+  };
+
+  const handleCreateRole = async () => {
+    try {
+      await roleService.create(newRole);
+      await fetchRoles();
+      handleCloseDialog();
+      setError(null);
+      showSuccessAlert('Success', 'Role created successfully');
+    } catch (err) {
+      setError(err.message);
+      showErrorAlert('Error', err.message);
+    }
+  };
+
+  const handleUpdateRole = async () => {
+    try {
+      const updateData = {
+        id: selectedRole.id,
+        roleName: editRole.roleName
+      };
+      await roleService.update(selectedRole.id, updateData);
+      await fetchRoles();
+      handleCloseEditDialog();
+      setError(null);
+      showSuccessAlert('Success', 'Role updated successfully');
+    } catch (err) {
+      setError(err.message);
+      showErrorAlert('Error', err.message);
+    }
+  };
+
+  const handleDeleteRole = async (id) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#0066FF',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+      background: 'rgba(0, 20, 40, 0.95)',
+      color: '#fff',
+      backdrop: 'rgba(0, 0, 0, 0.7)',
+      customClass: {
+        title: 'swal2-title',
+        content: 'swal2-content',
+        confirmButton: 'swal2-confirm-button',
+        cancelButton: 'swal2-cancel-button',
+      },
+      buttonsStyling: false,
+      width: '400px',
+      padding: '2rem',
+      titleText: 'Are you sure?',
+      html: `
+        <div style="font-size: 1.1rem; margin-top: 1rem;">You won't be able to revert this!</div>
+        <style>
+          .swal2-confirm-button {
+            background: linear-gradient(45deg, #0066FF, #00B4FF) !important;
+            border: none !important;
+            color: white !important;
+            padding: 10px 30px !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.4) !important;
+            transition: all 0.3s ease !important;
+            margin-right: 10px !important;
+          }
+          .swal2-confirm-button:hover {
+            background: linear-gradient(45deg, #0055DD, #0099FF) !important;
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.6) !important;
+            transform: translateY(-2px) !important;
+          }
+          .swal2-cancel-button {
+            background: linear-gradient(45deg, #FF3366, #FF6B6B) !important;
+            border: none !important;
+            color: white !important;
+            padding: 10px 30px !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            border-radius: 4px !important;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.4) !important;
+            transition: all 0.3s ease !important;
+          }
+          .swal2-cancel-button:hover {
+            background: linear-gradient(45deg, #FF1A4D, #FF5252) !important;
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.6) !important;
+            transform: translateY(-2px) !important;
+          }
+        </style>
+      `,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await roleService.delete(id);
+          await fetchRoles();
+          setError(null);
+          showSuccessAlert('Deleted!', 'Role has been deleted.');
+        } catch (err) {
+          setError(err.message);
+          showErrorAlert('Error', err.message);
+        }
+      }
+    });
+  };
+
+  const handleRoleChange = (field, value, isEdit = false) => {
+    if (isEdit) {
+      setEditRole(prev => ({ ...prev, [field]: value }));
+    } else {
+      setNewRole(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4">
-          Role Management
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDialog}
-        >
-          Add Role
-        </Button>
-      </Box>
+    <Box sx={{
+      p: 3,
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #001427 0%, #000B1A 100%)',
+    }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          borderRadius: 2,
+          background: 'rgba(0, 20, 40, 0.7)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(0, 102, 255, 0.1)',
+          animation: `${fadeIn} 0.5s ease-out`,
+          boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        }}
+      >
+        <RoleHeader onRefresh={fetchRoles} onAddRole={handleOpenDialog} />
 
-      <Paper sx={{ height: 600, width: '100%' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSize={10}
-          rowsPerPageOptions={[10]}
-          checkboxSelection
-          disableSelectionOnClick
+        <RoleDataGrid
+          roles={roles}
+          loading={loading}
+          onEdit={handleOpenEditDialog}
+          onDelete={handleDeleteRole}
         />
       </Paper>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Create New Role</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Role Name"
-            type="text"
-            fullWidth
-            value={newRole.name}
-            onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Description"
-            type="text"
-            fullWidth
-            multiline
-            rows={4}
-            value={newRole.description}
-            onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleCreateRole} variant="contained" color="primary">
-            Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <RoleDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        title="Create New Role"
+        role={newRole}
+        onChange={(field, value) => handleRoleChange(field, value)}
+        onSubmit={handleCreateRole}
+      />
+
+      <RoleDialog
+        open={openEditDialog}
+        onClose={handleCloseEditDialog}
+        title="Edit Role"
+        role={editRole}
+        onChange={(field, value) => handleRoleChange(field, value, true)}
+        onSubmit={handleUpdateRole}
+        isEdit={true}
+      />
     </Box>
   );
 };

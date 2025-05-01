@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
 import RolesPage from "./pages/RolesPage";
+import UserRolesPage from "./pages/UserRolesPage";
 import FilesPage from "./pages/FilesPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 
@@ -23,6 +24,7 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="roles" element={<RolesPage />} />
+          <Route path="roles/user-roles" element={<UserRolesPage />} />
           <Route path="files" element={<FilesPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />

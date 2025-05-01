@@ -1,18 +1,37 @@
-import React from 'react';
-import { Box, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Collapse } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import FolderIcon from '@mui/icons-material/Folder';
-import { Link } from 'react-router-dom';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import { Link, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
+  const [openRoles, setOpenRoles] = useState(false);
+  const location = useLocation();
+
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Users', icon: <PeopleIcon />, path: '/users' },
-    { text: 'Roles', icon: <VpnKeyIcon />, path: '/roles' },
+    {
+      text: 'Roles',
+      icon: <VpnKeyIcon />,
+      isDropdown: true,
+      subItems: [
+        { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
+      ]
+    },
     { text: 'Files', icon: <FolderIcon />, path: '/files' },
   ];
+
+  const handleClick = (item) => {
+    if (item.isDropdown) {
+      setOpenRoles(!openRoles);
+    }
+  };
 
   return (
     <Box
@@ -31,23 +50,56 @@ const Sidebar = () => {
       </Box>
       <List>
         {menuItems.map((item) => (
-          <ListItem
-            button
-            component={Link}
-            to={item.path}
-            key={item.text}
-            sx={{
-              '&:hover': {
-                bgcolor: 'rgba(255, 255, 255, 0.08)',
-              },
-              py: 1.5,
-            }}
-          >
-            <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItem>
+          <React.Fragment key={item.text}>
+            <ListItem
+              button
+              component={item.isDropdown ? 'div' : Link}
+              to={!item.isDropdown ? item.path : undefined}
+              onClick={() => handleClick(item)}
+              sx={{
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.08)',
+                },
+                py: 1.5,
+                bgcolor: !item.isDropdown && location.pathname === item.path ? 'rgba(255, 255, 255, 0.12)' :
+                  item.isDropdown && location.pathname.includes('/roles') ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
+                cursor: 'pointer',
+              }}
+            >
+              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+              {item.isDropdown && (openRoles ? <ExpandLess /> : <ExpandMore />)}
+            </ListItem>
+            {item.isDropdown && (
+              <Collapse in={openRoles} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {item.subItems.map((subItem) => (
+                    <ListItem
+                      button
+                      component={Link}
+                      to={subItem.path}
+                      key={subItem.text}
+                      sx={{
+                        pl: 4,
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.08)',
+                        },
+                        py: 1.5,
+                        bgcolor: location.pathname === subItem.path ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
+                      }}
+                    >
+                      <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
+                        {subItem.icon}
+                      </ListItemIcon>
+                      <ListItemText primary={subItem.text} />
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            )}
+          </React.Fragment>
         ))}
       </List>
     </Box>
