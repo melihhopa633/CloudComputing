@@ -12,11 +12,21 @@ services:
       - Jwt__Issuer=IdentityService
       - Jwt__Audience=IdentityServiceUsers
       - Jwt__ExpireHours=2
+      - Serilog__SeqServerUrl=http://seq:5341
     ports:
       - "5001:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      seq:
+        condition: service_started
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/auth/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   postgres:
     image: postgres:16
@@ -30,6 +40,23 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    environment:
+      ACCEPT_EULA: "Y"
+    ports:
+      - "5341:80"
+    volumes:
+      - seqdata:/data
+    restart: unless-stopped
 
 volumes:
   pgdata:
+  seqdata:
