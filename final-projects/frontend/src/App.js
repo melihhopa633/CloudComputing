@@ -13,50 +13,19 @@ import RolesPage from "./pages/RolesPage";
 import FilesPage from "./pages/FilesPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 
-const PrivateRoute = ({ children }) => {
-  // Token kontrolünü kaldırıyoruz, doğrudan dashboard layoutu gösteriyoruz
-  return <DashboardLayout>{children}</DashboardLayout>;
-};
-
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <DashboardPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/dashboard/users"
-          element={
-            <PrivateRoute>
-              <UsersPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/dashboard/roles"
-          element={
-            <PrivateRoute>
-              <RolesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/dashboard/files"
-          element={
-            <PrivateRoute>
-              <FilesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<DashboardLayout />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="roles" element={<RolesPage />} />
+          <Route path="files" element={<FilesPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );

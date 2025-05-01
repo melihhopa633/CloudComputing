@@ -13,6 +13,7 @@ const drawerWidth = 240;
 
 const DashboardLayout = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
@@ -20,10 +21,10 @@ const DashboardLayout = () => {
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Users', icon: <PeopleIcon />, path: '/dashboard/users' },
-    { text: 'Roles', icon: <RoleIcon />, path: '/dashboard/roles' },
-    { text: 'Files', icon: <FileIcon />, path: '/dashboard/files' },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Users', icon: <PeopleIcon />, path: '/users' },
+    { text: 'Roles', icon: <RoleIcon />, path: '/roles' },
+    { text: 'Files', icon: <FileIcon />, path: '/files' },
   ];
 
   const drawer = (
@@ -35,9 +36,21 @@ const DashboardLayout = () => {
       </Toolbar>
       <List>
         {menuItems.map((item) => (
-          <ListItem button key={item.text} onClick={() => window.location.href = item.path}>
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
+          <ListItem
+            key={item.text}
+            onClick={() => navigate(item.path)}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(0, 102, 255, 0.1)',
+                cursor: 'pointer'
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: '#0066FF' }}>{item.icon}</ListItemIcon>
+            <ListItemText
+              primary={item.text}
+              sx={{ color: '#fff' }}
+            />
           </ListItem>
         ))}
       </List>
@@ -45,7 +58,7 @@ const DashboardLayout = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', bgcolor: '#001427', minHeight: '100vh' }}>
       <AppBar
         position="fixed"
         sx={{
@@ -78,11 +91,16 @@ const DashboardLayout = () => {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              bgcolor: '#001427',
+              borderRight: '1px solid rgba(0, 102, 255, 0.1)',
+            },
           }}
         >
           {drawer}
@@ -91,7 +109,12 @@ const DashboardLayout = () => {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              bgcolor: '#001427',
+              borderRight: '1px solid rgba(0, 102, 255, 0.1)',
+            },
           }}
           open
         >
@@ -104,9 +127,10 @@ const DashboardLayout = () => {
           flexGrow: 1,
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: 8
+          mt: '64px',
         }}
-      >        <Outlet />
+      >
+        <Outlet />
       </Box>
     </Box>
   );

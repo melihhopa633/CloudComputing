@@ -40,6 +40,17 @@ builder.Services.AddCarter();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddFluentValidationAutoValidation();
@@ -92,6 +103,9 @@ using (var scope = app.Services.CreateScope())
 
 // Use Exception Middleware
 app.UseMiddleware<ExceptionsMiddleware>();
+
+// Enable CORS
+app.UseCors();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

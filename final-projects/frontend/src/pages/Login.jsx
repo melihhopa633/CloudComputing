@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import authService from "../services/authService";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,6 +8,7 @@ const Login = () => {
   
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Direkt olarak dashboard'a yönlendir
     navigate("/dashboard");
   };
 
