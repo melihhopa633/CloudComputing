@@ -23,8 +23,7 @@ namespace IdentityService.Features.User.CreateUser
                 Username = request.Username,
                 Email = request.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-                CreatedAt = DateTime.UtcNow,
-                UserRoles = new System.Collections.Generic.List<Entities.UserRole>()
+                CreatedAt = DateTime.UtcNow
             };
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync(cancellationToken);
