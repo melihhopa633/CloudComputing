@@ -4,10 +4,11 @@ using IdentityService.Security;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
+using MediatR;
 
 namespace IdentityService.Features.Auth.Login;
 
-public class LoginCommandHandler
+public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 {
     private readonly AppDbContext _context;
     private readonly JwtService _jwtService;
@@ -18,18 +19,17 @@ public class LoginCommandHandler
         _jwtService = jwtService;
     }
 
-    public async Task<LoginResponse> Handle(LoginCommand command)
+    public async Task<LoginResponse> Handle(LoginCommand command, CancellationToken cancellationToken)
     {
         var user = await _context.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Username == command.Username);
+            .FirstOrDefaultAsync(u => u.Username == command.Username, cancellationToken);
 
         if (user == null)
             throw new UnauthorizedException("Invalid username or password");
 
-        var passwordHash = ComputeHash(command.Password);
-        if (passwordHash != user.PasswordHash)
+        if (!BCrypt.Net.BCrypt.Verify(command.Password, user.PasswordHash))
             throw new UnauthorizedException("Invalid username or password");
 
         var accessToken = _jwtService.GenerateAccessToken(user);
@@ -38,7 +38,7 @@ public class LoginCommandHandler
         // Update user's refresh token
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
         
         return new LoginResponse
         {
@@ -48,13 +48,5 @@ public class LoginCommandHandler
             Email = user.Email,
             Roles = user.UserRoles.Select(ur => ur.Role.RoleName)
         };
-    }
-
-    private string ComputeHash(string password)
-    {
-        using var sha256 = SHA256.Create();
-        var bytes = Encoding.UTF8.GetBytes(password);
-        var hash = sha256.ComputeHash(bytes);
-        return Convert.ToBase64String(hash);
     }
 } 

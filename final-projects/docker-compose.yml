@@ -8,7 +8,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=identity_db;Username=postgres;Password=postgres
-      - Jwt__Key=YourSuperSecretKeyHereChangeMe!
+      - Jwt__Key=bXlfc3VwZXJfc2VjcmV0X2FuZF9sb25nX2tleV9mb3Jfc2lnbmluZ190b2tlbnNfMzJieXRlcw==
       - Jwt__Issuer=IdentityService
       - Jwt__Audience=IdentityServiceUsers
       - Jwt__ExpireHours=2

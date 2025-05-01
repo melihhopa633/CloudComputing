@@ -2,10 +2,11 @@ using IdentityService.Common.Exceptions;
 using IdentityService.Persistence;
 using IdentityService.Security;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
 
 namespace IdentityService.Features.Auth.RefreshToken;
 
-public class RefreshTokenCommandHandler
+public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, RefreshTokenResponse>
 {
     private readonly AppDbContext _context;
     private readonly JwtService _jwtService;
@@ -16,7 +17,7 @@ public class RefreshTokenCommandHandler
         _jwtService = jwtService;
     }
 
-    public async Task<RefreshTokenResponse> Handle(RefreshTokenCommand command)
+    public async Task<RefreshTokenResponse> Handle(RefreshTokenCommand command, CancellationToken cancellationToken)
     {
         // First validate the refresh token format
         if (!_jwtService.ValidateToken(command.RefreshToken, isRefreshToken: true))
@@ -25,7 +26,7 @@ public class RefreshTokenCommandHandler
         var user = await _context.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.RefreshToken == command.RefreshToken);
+            .FirstOrDefaultAsync(u => u.RefreshToken == command.RefreshToken, cancellationToken);
 
         if (user == null)
             throw new UnauthorizedException("Invalid refresh token");
@@ -40,7 +41,7 @@ public class RefreshTokenCommandHandler
         // Update user's refresh token
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return new RefreshTokenResponse
         {

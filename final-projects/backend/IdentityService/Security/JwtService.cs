@@ -1,4 +1,5 @@
 using IdentityService.Entities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -11,19 +12,24 @@ namespace IdentityService.Security
 {
     public class JwtService
     {
-        private readonly string _jwtSecret;
-        private readonly string _issuer;
-        private readonly string _audience;
-        private readonly int _accessTokenExpiryHours;
-        private readonly int _refreshTokenExpiryDays;
+        private readonly IConfiguration _configuration;
+        private readonly TokenValidationParameters _tokenValidationParameters;
 
-        public JwtService(string jwtSecret, string issuer, string audience, int accessTokenExpiryHours = 2, int refreshTokenExpiryDays = 7)
+        public JwtService(IConfiguration configuration)
         {
-            _jwtSecret = jwtSecret;
-            _issuer = issuer;
-            _audience = audience;
-            _accessTokenExpiryHours = accessTokenExpiryHours;
-            _refreshTokenExpiryDays = refreshTokenExpiryDays;
+            _configuration = configuration;
+            
+            _tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = _configuration.GetValue<bool>("Jwt:ValidateIssuerSigningKey"),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)),
+                ValidateIssuer = _configuration.GetValue<bool>("Jwt:ValidateIssuer"),
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidateAudience = _configuration.GetValue<bool>("Jwt:ValidateAudience"),
+                ValidAudience = _configuration["Jwt:Audience"],
+                ValidateLifetime = _configuration.GetValue<bool>("Jwt:ValidateLifetime"),
+                ClockSkew = TimeSpan.Parse(_configuration["Jwt:ClockSkew"]!)
+            };
         }
 
         public string GenerateAccessToken(User user)
@@ -41,7 +47,7 @@ namespace IdentityService.Security
                 claims.Add(new Claim(ClaimTypes.Role, role.Role.RoleName));
             }
 
-            return GenerateToken(claims, TimeSpan.FromHours(_accessTokenExpiryHours));
+            return GenerateToken(claims, TimeSpan.FromHours(_configuration.GetValue<int>("Jwt:AccessTokenExpireHours")));
         }
 
         public string GenerateRefreshToken(User user)
@@ -52,17 +58,17 @@ namespace IdentityService.Security
                 new Claim("token_type", "refresh_token")
             };
 
-            return GenerateToken(claims, TimeSpan.FromDays(_refreshTokenExpiryDays));
+            return GenerateToken(claims, TimeSpan.FromDays(_configuration.GetValue<int>("Jwt:RefreshTokenExpireDays")));
         }
 
         private string GenerateToken(IEnumerable<Claim> claims, TimeSpan expiration)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             
             var token = new JwtSecurityToken(
-                issuer: _issuer,
-                audience: _audience,
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.Add(expiration),
                 signingCredentials: creds
@@ -74,21 +80,10 @@ namespace IdentityService.Security
         public bool ValidateToken(string token, bool isRefreshToken = false)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
 
             try
             {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = key,
-                    ValidateIssuer = true,
-                    ValidIssuer = _issuer,
-                    ValidateAudience = true,
-                    ValidAudience = _audience,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
+                tokenHandler.ValidateToken(token, _tokenValidationParameters, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var tokenType = jwtToken.Claims.First(x => x.Type == "token_type").Value;
@@ -98,6 +93,27 @@ namespace IdentityService.Security
             catch
             {
                 return false;
+            }
+        }
+
+        public ClaimsPrincipal? GetPrincipalFromToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, _tokenValidationParameters, out SecurityToken validatedToken);
+                if (validatedToken is JwtSecurityToken jwtToken)
+                {
+                    var hasValidSecurityAlgorithm = jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+                    if (!hasValidSecurityAlgorithm)
+                        return null;
+                }
+                return principal;
+            }
+            catch
+            {
+                return null;
             }
         }
     }

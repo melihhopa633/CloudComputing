@@ -10,6 +10,9 @@ using FluentValidation.AspNetCore;
 using MediatR;
 using Serilog;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,34 +44,32 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddFluentValidationAutoValidation();
 
-// Add JWT Service
-builder.Services.AddSingleton<JwtService>(sp =>
-    new JwtService(
-        builder.Configuration["Jwt:Key"]!,
-        builder.Configuration["Jwt:Issuer"]!,
-        builder.Configuration["Jwt:Audience"]!,
-        int.Parse(builder.Configuration["Jwt:ExpireHours"] ?? "2"),
-        7 // Refresh token expires in 7 days
-    ));
+// Add JWT Service as Singleton
+builder.Services.AddSingleton<JwtService>();
 
-// Add Authentication
+// Configure Authentication
+var jwtSettings = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = "JwtBearer";
-    options.DefaultChallengeScheme = "JwtBearer";
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer("JwtBearer", options =>
+.AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        ValidateIssuerSigningKey = jwtSettings.GetValue<bool>("ValidateIssuerSigningKey"),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
+        ValidateIssuer = jwtSettings.GetValue<bool>("ValidateIssuer"),
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidateAudience = jwtSettings.GetValue<bool>("ValidateAudience"),
+        ValidAudience = jwtSettings["Audience"],
+        ValidateLifetime = jwtSettings.GetValue<bool>("ValidateLifetime"),
+        ClockSkew = TimeSpan.Parse(jwtSettings["ClockSkew"]!)
     };
+
+    options.RequireHttpsMetadata = jwtSettings.GetValue<bool>("RequireHttpsMetadata");
+    options.SaveToken = true;
 });
 
 builder.Services.AddAuthorization();
