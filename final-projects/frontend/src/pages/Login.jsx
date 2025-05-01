@@ -65,7 +65,7 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-lg bg-[#010B1D] border border-[#0066FF]/20 text-white placeholder-gray-500
               focus:outline-none focus:border-[#0066FF] transition-colors"
-              placeholder="gpt4asian@gmail.com"
+              placeholder="abc_123@gmail.com"
             />
 
             <input

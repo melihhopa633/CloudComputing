@@ -6,52 +6,122 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
     try {
-      await authService.register(username, email, password);
-      setSuccess("Registration successful! Please login.");
-      setUsername("");
-      setEmail("");
-      setPassword("");
+      await authService.register({ username, email, password });
+      window.location.href = "/login";
     } catch (err) {
-      setError("Registration failed. " + (err.response?.data?.message || ""));
+      setError("Registration failed. Please check your information.");
     }
   };
 
   return (
-    <div className="auth-container">
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Register</button>
-        {error && <div className="error">{error}</div>}
-        {success && <div className="success">{success}</div>}
-      </form>
+    <div className="min-h-screen flex bg-[#010B1D] relative overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-5"
+        style={{
+          backgroundImage: `radial-gradient(#0A4B94 1px, transparent 1px)`,
+          backgroundSize: "30px 30px",
+        }}
+      ></div>
+
+      <div className="flex-1 flex items-center justify-center">
+        <div className="w-[500px] h-[500px] relative">
+          <div className="absolute inset-0 blur-[100px] bg-[#0066FF] opacity-20 rounded-full"></div>
+          <svg
+            className="w-full h-full text-[#0066FF] opacity-90"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.93 8.87-7 10.13V3.18z" />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg
+              className="w-1/2 h-1/2 text-[#0066FF] opacity-90"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center pr-32">
+        <div className="w-[380px] bg-[#010B1D]/95 backdrop-blur-lg rounded-3xl p-8 border border-[#0066FF]/10">
+          <div className="flex justify-center mb-6">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center">
+              <svg
+                className="w-8 h-8 text-[#0066FF]"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.93 8.87-7 10.13V3.18z" />
+              </svg>
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-bold text-white text-center mb-8">
+            Register
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-[#010B1D] border border-[#0066FF]/20 text-white placeholder-gray-500
+              focus:outline-none focus:border-[#0066FF] transition-colors"
+              placeholder="Username"
+              required
+            />
+
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-[#010B1D] border border-[#0066FF]/20 text-white placeholder-gray-500
+              focus:outline-none focus:border-[#0066FF] transition-colors"
+              placeholder="Email address"
+              required
+            />
+
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-[#010B1D] border border-[#0066FF]/20 text-white placeholder-gray-500
+              focus:outline-none focus:border-[#0066FF] transition-colors"
+              placeholder="Password"
+              required
+            />
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#0066FF] text-white rounded-lg font-medium hover:bg-[#0055DD] transition-colors"
+            >
+              Register
+            </button>
+
+            {error && (
+              <div className="text-red-400 text-sm text-center">{error}</div>
+            )}
+
+            <div className="text-center text-sm text-gray-400">
+              Already have an account?{" "}
+              <a
+                href="/login"
+                className="text-[#0066FF] hover:text-[#0055DD]"
+              >
+                Sign In
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

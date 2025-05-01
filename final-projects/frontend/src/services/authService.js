@@ -1,31 +1,24 @@
-import axiosInstance from "../utils/axiosInstance";
+import axios from 'axios';
 
-const register = (username, email, password) => {
-  return axiosInstance.post("/api/auth/register", {
-    username,
-    email,
-    password,
-  });
-};
-
-const login = async (email, password) => {
-  const response = await axiosInstance.post("/api/auth/login", {
-    email,
-    password,
-  });
-  const { token } = response.data;
-  localStorage.setItem("jwtToken", token);
-  return response.data;
-};
-
-const logout = () => {
-  localStorage.removeItem("jwtToken");
-};
+const API_URL = 'http://localhost:5000/api/auth'; // adjust the URL based on your backend
 
 const authService = {
-  register,
-  login,
-  logout,
+  async register(userData) {
+    const response = await axios.post(`${API_URL}/register`, userData);
+    return response.data;
+  },
+
+  async login(email, password) {
+    const response = await axios.post(`${API_URL}/login`, { email, password });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response.data;
+  },
+
+  logout() {
+    localStorage.removeItem('token');
+  }
 };
 
 export default authService;
