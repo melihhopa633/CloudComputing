@@ -77,34 +77,7 @@ Retrieves a specific user-role assignment.
 **Error Response:**
 - `404 Not Found`: UserRole not found
 
-### 4. Update User Role
-Updates a user-role assignment.
 
-**Endpoint:** `PUT /api/userroles/{id}`
-
-**Parameters:**
-- `id`: GUID of the user-role assignment (in URL)
-
-**Request Body:**
-```json
-{
-    "id": "7fa85f64-5717-4562-b3fc-2c963f66afa8",
-    "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    "roleId": "9da85f64-5717-4562-b3fc-2c963f66afa9"
-}
-```
-
-**Success Response (200 OK):**
-```json
-{
-    "success": true,
-    "message": "UserRole updated"
-}
-```
-
-**Error Responses:**
-- `400 Bad Request`: ID mismatch between URL and request body
-- `404 Not Found`: UserRole not found or invalid user/role
 
 ### 5. Delete User Role
 Removes a role from a user.

@@ -7,27 +7,15 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
-const Dashboard = () => {
-  return (
-    <div className="auth-container">
-      <h2>Dashboard</h2>
-      <p>Welcome! You are logged in.</p>
-      <button
-        onClick={() => {
-          localStorage.removeItem("jwtToken");
-          window.location.href = "/login";
-        }}
-      >
-        Logout
-      </button>
-    </div>
-  );
-};
+import DashboardPage from "./pages/DashboardPage";
+import UsersPage from "./pages/UsersPage";
+import RolesPage from "./pages/RolesPage";
+import FilesPage from "./pages/FilesPage";
+import DashboardLayout from "./layouts/DashboardLayout";
 
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem("jwtToken");
-  return token ? children : <Navigate to="/login" />;
+  // Token kontrolünü kaldırıyoruz, doğrudan dashboard layoutu gösteriyoruz
+  return <DashboardLayout>{children}</DashboardLayout>;
 };
 
 function App() {
@@ -40,7 +28,31 @@ function App() {
           path="/dashboard"
           element={
             <PrivateRoute>
-              <Dashboard />
+              <DashboardPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard/users"
+          element={
+            <PrivateRoute>
+              <UsersPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard/roles"
+          element={
+            <PrivateRoute>
+              <RolesPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard/files"
+          element={
+            <PrivateRoute>
+              <FilesPage />
             </PrivateRoute>
           }
         />

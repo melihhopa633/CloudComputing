@@ -1,21 +1,15 @@
 import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import authService from "../services/authService";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const handleSubmit = async (e) => {
+  
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError("");
-    try {
-      await authService.login(email, password);
-      // Redirect on successful login - replace with your routing logic if using a router
-      window.location.href = "/dashboard";
-    } catch (err) {
-      setError("Invalid email or password. Please try again."); // More specific error
-    }
+    navigate("/dashboard");
   };
 
   return (
@@ -75,23 +69,13 @@ const Login = () => {
               className="w-full px-4 py-3 rounded-lg bg-[#010B1D] border border-[#0066FF]/20 text-white placeholder-gray-500
               focus:outline-none focus:border-[#0066FF] transition-colors"
               placeholder="••••••"
-            />
-
-            <button
+            />            <button
               type="submit"
               className="w-full py-3 bg-[#0066FF] text-white rounded-lg font-medium hover:bg-[#0055DD] transition-colors"
             >
               Login
-            </button>
-
-            {error && (
-              <div className="text-red-400 text-sm text-center">
-                {error}
-              </div>
-            )}
-
-            <div className="text-center text-sm text-gray-400">
-              Don't have an account? <a href="/register" className="text-[#0066FF] hover:text-[#0055DD]">Sign Up</a>
+            </button>            <div className="text-center text-sm text-gray-400">
+              Don't have an account? <Link to="/register" className="text-[#0066FF] hover:text-[#0055DD]">Sign Up</Link>
             </div>
           </form>
         </div>
