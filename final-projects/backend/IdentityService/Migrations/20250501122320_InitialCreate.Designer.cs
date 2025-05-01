@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace IdentityService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250427193059_InitialCreate")]
+    [Migration("20250501122320_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -56,6 +56,12 @@ namespace IdentityService.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Username")
                         .IsRequired()

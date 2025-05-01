@@ -2,6 +2,8 @@ using Carter;
 using IdentityService.Persistence;
 using IdentityService.Security;
 using IdentityService.Common;
+using IdentityService.Features.Auth;
+using IdentityService.Features.Auth.Login;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -23,7 +25,13 @@ builder.Services.AddFluentValidationAutoValidation();
 
 // Add JWT Service
 builder.Services.AddSingleton<JwtService>(sp =>
-    new JwtService(builder.Configuration["Jwt:Key"]!));
+    new JwtService(
+        builder.Configuration["Jwt:Key"]!,
+        builder.Configuration["Jwt:Issuer"]!,
+        builder.Configuration["Jwt:Audience"]!,
+        int.Parse(builder.Configuration["Jwt:ExpireHours"] ?? "2"),
+        7 // Refresh token expires in 7 days
+    ));
 
 // Add Authentication
 builder.Services.AddAuthentication(options =>
@@ -70,6 +78,7 @@ app.UseMiddleware<ExceptionsMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 // Carter endpoints
 app.MapCarter();
