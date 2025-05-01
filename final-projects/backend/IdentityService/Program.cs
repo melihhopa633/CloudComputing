@@ -8,9 +8,19 @@ using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
-
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.Seq(builder.Configuration["Serilog:SeqServerUrl"] ?? "http://seq:5341")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add Carter for Minimal API
 builder.Services.AddCarter();
@@ -55,7 +65,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-
 // Add MediatR for CQRS
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
@@ -69,18 +78,32 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     DbSeeder.Seed(dbContext);
+    Log.Information("Database seeded successfully");
 }
 
 // Use Exception Middleware
 app.UseMiddleware<ExceptionsMiddleware>();
 
-
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Add Serilog request logging
+app.UseSerilogRequestLogging();
 
 // Carter endpoints
 app.MapCarter();
 
-app.Run();
+try
+{
+    Log.Information("Starting IdentityService");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
