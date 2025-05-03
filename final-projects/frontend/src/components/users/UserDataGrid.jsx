@@ -50,6 +50,7 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
             field: 'actions',
             headerName: 'Actions',
             width: 150,
+            flex: 0.7,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', gap: 1 }}>
                     <Tooltip title="Edit user">
@@ -93,6 +94,7 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
         <DataGrid
             rows={users}
             columns={columns}
+            autoHeight
             pageSize={10}
             rowsPerPageOptions={[10]}
             checkboxSelection
@@ -102,6 +104,7 @@ const UserDataGrid = ({ users, loading, onEdit, onDelete }) => {
                 border: 'none',
                 background: 'rgba(0, 20, 40, 0.7)',
                 backdropFilter: 'blur(10px)',
+                width: '100%',
                 '& .MuiDataGrid-main': {
                     backgroundColor: 'transparent',
                 },

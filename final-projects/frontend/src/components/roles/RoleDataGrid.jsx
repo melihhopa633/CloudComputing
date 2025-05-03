@@ -32,24 +32,12 @@ const RoleDataGrid = ({ roles, loading, onEdit, onDelete }) => {
                 </Typography>
             )
         },
-        {
-            field: 'createdAt',
-            headerName: 'Created At',
-            width: 200,
-            renderCell: (params) => (
-                <Typography variant="body2" sx={{
-                    color: '#0099FF',
-                    fontWeight: 500,
-                    textShadow: '0 0 10px rgba(0, 153, 255, 0.3)',
-                }}>
-                    {new Date(params.value).toLocaleDateString()}
-                </Typography>
-            )
-        },
+
         {
             field: 'actions',
             headerName: 'Actions',
             width: 150,
+            flex: 0.7,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', gap: 1 }}>
                     <Tooltip title="Edit role">
@@ -93,6 +81,7 @@ const RoleDataGrid = ({ roles, loading, onEdit, onDelete }) => {
         <DataGrid
             rows={roles}
             columns={columns}
+            autoHeight
             pageSize={10}
             rowsPerPageOptions={[10]}
             checkboxSelection
@@ -102,6 +91,7 @@ const RoleDataGrid = ({ roles, loading, onEdit, onDelete }) => {
                 border: 'none',
                 background: 'rgba(0, 20, 40, 0.7)',
                 backdropFilter: 'blur(10px)',
+                width: '100%',
                 '& .MuiDataGrid-main': {
                     backgroundColor: 'transparent',
                 },

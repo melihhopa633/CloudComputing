@@ -31,20 +31,12 @@ const Register = () => {
       <div className="flex-1 flex items-center justify-center">
         <div className="w-[500px] h-[500px] relative">
           <div className="absolute inset-0 blur-[100px] bg-[#0066FF] opacity-20 rounded-full"></div>
-          <svg
-            className="w-full h-full text-[#0066FF] opacity-90"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.93 8.87-7 10.13V3.18z" />
+          <svg className="w-full h-full text-[#0066FF] opacity-90" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <svg
-              className="w-1/2 h-1/2 text-[#0066FF] opacity-90"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6z" />
+            <svg className="w-1/2 h-1/2 text-[#0066FF] opacity-90" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
             </svg>
           </div>
         </div>
@@ -54,12 +46,8 @@ const Register = () => {
         <div className="w-[380px] bg-[#010B1D]/95 backdrop-blur-lg rounded-3xl p-8 border border-[#0066FF]/10">
           <div className="flex justify-center mb-6">
             <div className="w-12 h-12 rounded-full flex items-center justify-center">
-              <svg
-                className="w-8 h-8 text-[#0066FF]"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-2.93 8.87-7 10.13V3.18z" />
+              <svg className="w-8 h-8 text-[#0066FF]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
               </svg>
             </div>
           </div>

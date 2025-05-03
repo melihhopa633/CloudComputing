@@ -36,6 +36,7 @@ const UserRoleDataGrid = ({ userRoles, loading, onDelete }) => {
             field: 'actions',
             headerName: 'Actions',
             width: 100,
+            flex: 0.5,
             renderCell: (params) => (
                 <Box sx={{ display: 'flex', gap: 1 }}>
                     <Tooltip title="Remove role">
@@ -63,6 +64,7 @@ const UserRoleDataGrid = ({ userRoles, loading, onDelete }) => {
         <DataGrid
             rows={userRoles}
             columns={columns}
+            autoHeight
             pageSize={10}
             rowsPerPageOptions={[10]}
             checkboxSelection
@@ -72,6 +74,7 @@ const UserRoleDataGrid = ({ userRoles, loading, onDelete }) => {
                 border: 'none',
                 background: 'rgba(0, 20, 40, 0.7)',
                 backdropFilter: 'blur(10px)',
+                width: '100%',
                 '& .MuiDataGrid-cell': {
                     borderBottom: '1px solid rgba(0, 102, 255, 0.1)',
                     transition: 'all 0.3s ease',

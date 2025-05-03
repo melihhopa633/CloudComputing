@@ -10,7 +10,10 @@ import {
   Assignment as AssignmentIcon,
   ExpandLess,
   ExpandMore,
+  AccountCircle,
 } from '@mui/icons-material';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 
 const drawerWidth = 240;
 
@@ -21,6 +24,8 @@ const DashboardLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openRoles, setOpenRoles] = useState(false);
   const [openUserManagement, setOpenUserManagement] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -51,13 +56,24 @@ const DashboardLayout = () => {
     }
   };
 
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    setAnchorEl(null);
+    navigate('/login');
+  };
+
+  const username = 'kullanici_adi'; // TODO: Replace with real username from auth
+
   const drawer = (
     <div>
-      <Toolbar>
-        <Typography variant="h6" noWrap>
-          Admin Panel
-        </Typography>
-      </Toolbar>
+
       <List>
         {menuItems.map((item) => (
           <React.Fragment key={item.text}>
@@ -127,22 +143,29 @@ const DashboardLayout = () => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          bgcolor: '#0066FF'
+          bgcolor: '#003366'
         }}
       >
-        <Toolbar>
+        <Toolbar sx={{ justifyContent: 'flex-end' }}>
           <IconButton
+            size="large"
+            edge="end"
             color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            onClick={handleMenu}
+            sx={{ ml: 2 }}
           >
-            <MenuIcon />
+            <AccountCircle fontSize="large" />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Admin Dashboard
-          </Typography>
+          <Menu
+            anchorEl={anchorEl}
+            open={openMenu}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem disabled>{username}</MenuItem>
+            <MenuItem onClick={handleLogout}>Çıkış Yap</MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
       <Box

@@ -6,6 +6,8 @@ import userRoleService from '../services/userRoleService';
 import Swal from 'sweetalert2';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
+import UserRoleHeader from '../components/userRoles/UserRoleHeader';
+import UserRoleDialog from '../components/userRoles/UserRoleDialog';
 
 const fadeIn = keyframes`
   from {
@@ -42,6 +44,7 @@ const UserRolesPage = () => {
     const [userRoles, setUserRoles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [openDialog, setOpenDialog] = useState(false);
 
     const columns = [
         {
@@ -62,17 +65,7 @@ const UserRolesPage = () => {
             flex: 1,
             headerClassName: 'super-app-theme--header'
         },
-        {
-            field: 'createdAt',
-            headerName: 'User Created At',
-            flex: 1.2,
-            headerClassName: 'super-app-theme--header',
-            valueGetter: (params) => {
-                if (!params || !params.row) return 'N/A';
-                const user = params.row.user;
-                return user?.createdAt ? formatDate(user.createdAt) : 'N/A';
-            }
-        },
+
         {
             field: 'actions',
             headerName: 'Actions',
@@ -196,9 +189,9 @@ const UserRolesPage = () => {
                     boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
                 }}
             >
-                <Typography variant="h5" component="h1" sx={{ color: '#fff', mb: 3 }}>
-                    User Role Management
-                </Typography>
+
+
+                <UserRoleHeader onRefresh={fetchUserRoles} onAddUserRole={() => setOpenDialog(true)} />
 
                 <Box sx={{ height: 400, width: '100%', mt: 3 }}>
                     <DataGrid
@@ -224,6 +217,14 @@ const UserRolesPage = () => {
                             },
                             '& .MuiDataGrid-columnHeaders': {
                                 borderBottom: '2px solid rgba(0, 102, 255, 0.2)'
+                            },
+                            '& .MuiDataGrid-row': {
+                                backgroundColor: 'rgba(0, 20, 40, 0.5) !important',
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(0, 102, 255, 0.15) !important',
+                                    color: '#fff',
+                                },
                             },
                             '& .MuiDataGrid-footerContainer': {
                                 bgcolor: 'rgba(0, 102, 255, 0.1)',
@@ -251,6 +252,22 @@ const UserRolesPage = () => {
                     />
                 </Box>
             </Paper>
+
+            <UserRoleDialog
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                title="Assign User Role"
+                onSubmit={async (data) => {
+                    try {
+                        await userRoleService.create(data);
+                        await fetchUserRoles();
+                        setOpenDialog(false);
+                        showSuccessAlert('Success', 'User role assigned successfully');
+                    } catch (err) {
+                        showErrorAlert('Error', err.message);
+                    }
+                }}
+            />
         </Box>
     );
 };
