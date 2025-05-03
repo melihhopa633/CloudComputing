@@ -1,0 +1,6 @@
+@ResourceManagerService_HostAddress = http://localhost:5166
+
+GET {{ResourceManagerService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
