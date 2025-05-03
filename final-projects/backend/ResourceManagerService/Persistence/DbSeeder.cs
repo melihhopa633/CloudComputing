@@ -1,0 +1,29 @@
+using System;
+using System.Linq;
+using ResourceManagerService.Entities;
+
+namespace ResourceManagerService.Persistence
+{
+    public static class DbSeeder
+    {
+        public static void Seed(AppDbContext context)
+        {
+            // Örnek seed: Eğer hiç task yoksa bir tane ekle
+            if (!context.Tasks.Any())
+            {
+                var task = new Task
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = Guid.NewGuid(),
+                    ServiceType = "jupyter",
+                    ContainerId = "",
+                    Port = 8888,
+                    StartTime = DateTime.UtcNow,
+                    Status = "Stopped"
+                };
+                context.Tasks.Add(task);
+                context.SaveChanges();
+            }
+        }
+    }
+} 
