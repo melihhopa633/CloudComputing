@@ -1,8 +1,6 @@
 using MediatR;
-using System.Collections.Generic;
-using ResourceManagerService.Entities;
 
-namespace ResourceManagerService.Features.Task
+namespace ResourceManagerService.Features.Task.GetAllTask
 {
     public record GetAllTaskQuery : IRequest<List<Entities.Task>>;
 } 

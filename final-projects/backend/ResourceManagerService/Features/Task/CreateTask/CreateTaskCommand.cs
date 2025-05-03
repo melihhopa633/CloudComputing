@@ -1,7 +1,6 @@
 using MediatR;
-using System;
 
-namespace ResourceManagerService.Features.Task
+namespace ResourceManagerService.Features.Task.CreateTask
 {
     public class CreateTaskCommand : IRequest<Guid>
     {

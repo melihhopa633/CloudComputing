@@ -6,6 +6,7 @@ using FluentValidation;
 using Serilog;
 using Hellang.Middleware.ProblemDetails;
 using Npgsql;
+using ResourceManagerService.Common;
 
 NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
 
@@ -60,5 +61,7 @@ if (app.Environment.IsDevelopment())
 app.MapCarter();
 
 app.UseHttpsRedirection();
+
+app.UseApiResponseMiddleware();
 
 app.Run();

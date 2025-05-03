@@ -1,8 +1,6 @@
 using MediatR;
-using System;
-using ResourceManagerService.Entities;
 
-namespace ResourceManagerService.Features.Task
+namespace ResourceManagerService.Features.Task.GetTask
 {
     public record GetTaskQuery(Guid Id) : IRequest<Entities.Task>;
 } 

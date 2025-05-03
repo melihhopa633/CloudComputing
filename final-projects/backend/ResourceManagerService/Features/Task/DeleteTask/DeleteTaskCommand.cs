@@ -1,7 +1,6 @@
 using MediatR;
-using System;
 
-namespace ResourceManagerService.Features.Task
+namespace ResourceManagerService.Features.Task.DeleteTask
 {
     public record DeleteTaskCommand(Guid Id) : IRequest<bool>;
 } 

@@ -1,12 +1,8 @@
 using MediatR;
 using ResourceManagerService.Entities;
 using ResourceManagerService.Persistence;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
-namespace ResourceManagerService.Features.Task
+namespace ResourceManagerService.Features.Task.CreateTask
 {
     public class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Guid>
     {

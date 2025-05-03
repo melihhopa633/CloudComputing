@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace ResourceManagerService.Features.Task
+namespace ResourceManagerService.Features.Task.CreateTask
 {
     public class CreateTaskValidator : AbstractValidator<CreateTaskCommand>
     {

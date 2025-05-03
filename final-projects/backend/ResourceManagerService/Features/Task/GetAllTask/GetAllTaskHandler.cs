@@ -1,11 +1,7 @@
 using MediatR;
 using ResourceManagerService.Persistence;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace ResourceManagerService.Features.Task
+namespace ResourceManagerService.Features.Task.GetAllTask
 {
     public class GetAllTaskHandler : IRequestHandler<GetAllTaskQuery, List<Entities.Task>>
     {

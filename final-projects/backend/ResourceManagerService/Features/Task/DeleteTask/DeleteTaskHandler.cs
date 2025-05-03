@@ -1,11 +1,8 @@
 using MediatR;
-using ResourceManagerService.Persistence;
 using ResourceManagerService.Entities;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using ResourceManagerService.Persistence;
 
-namespace ResourceManagerService.Features.Task
+namespace ResourceManagerService.Features.Task.DeleteTask
 {
     public class DeleteTaskHandler : IRequestHandler<DeleteTaskCommand, bool>
     {
