@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace ResourceManagerService.Features.Task.CreateTask
 {
-    public class CreateTaskHandler : IRequestHandler<CreateTaskCommand, Guid>
+    public class CreateTaskHandler : IRequestHandler<CreateTaskCommand, CreateTaskResponse>
     {
         private readonly AppDbContext _dbContext;
         private readonly DockerService _dockerService;
@@ -19,10 +19,10 @@ namespace ResourceManagerService.Features.Task.CreateTask
             _dockerService = dockerService;
         }
 
-        public async Task<Guid> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
+        public async Task<CreateTaskResponse> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
         {
-            // Docker container başlat
-            var (containerId, port) = await _dockerService.StartContainerAsync(request.ServiceType, request.Port);
+            // Docker container başlat (port otomatik bulunacak)
+            var (containerId, port) = await _dockerService.StartContainerAsync(request.ServiceType);
 
             var task = new Entities.Task
             {
@@ -44,7 +44,13 @@ namespace ResourceManagerService.Features.Task.CreateTask
             };
             _dbContext.Tasks.Add(task);
             await _dbContext.SaveChangesAsync(cancellationToken);
-            return task.Id;
+            return new CreateTaskResponse()
+            {
+                Id = task.Id,
+                ServiceType = task.ServiceType,
+                ContainerId = task.ContainerId,
+                Port = task.Port,
+            };
         }
     }
 } 

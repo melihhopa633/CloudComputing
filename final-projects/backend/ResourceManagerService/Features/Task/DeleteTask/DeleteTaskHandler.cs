@@ -32,11 +32,13 @@ namespace ResourceManagerService.Features.Task.DeleteTask
             task.Status = "Deleted";
             task.StopTime = DateTime.UtcNow;
             task.Duration = task.StopTime - task.StartTime;
-            task.Events.Add(new TaskEventData
+            var list = task.Events.ToList();
+            list.Add(new TaskEventData  
             {
                 Type = "Deleted",
                 Details = "Task deleted and container stopped"
             });
+            task.Events = list;
            
             await _dbContext.SaveChangesAsync(cancellationToken);
             return true;
