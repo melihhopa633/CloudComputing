@@ -13,6 +13,7 @@ import RolesPage from "./pages/RolesPage";
 import UserRolesPage from "./pages/UserRolesPage";
 import FilesPage from "./pages/FilesPage";
 import DashboardLayout from "./layouts/DashboardLayout";
+import TasksPage from "./pages/TasksPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="roles" element={<RolesPage />} />
           <Route path="roles/user-roles" element={<UserRolesPage />} />
           <Route path="files" element={<FilesPage />} />
+          <Route path="tasks" element={<TasksPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

@@ -108,43 +108,102 @@ namespace ResourceManagerService.Services
             int containerPort = config.ContainerPort;
             int hostPort = GetAvailablePort(10000, 60000);
 
-            if (!await DockerImageExists(image))
+            try
             {
-                Console.WriteLine($"📦 Pulling missing image: {image}");
-                await DockerPullImage(image);
-            }
+                // Docker versiyonunu kontrol et
+                await CheckDockerAvailabilityAsync();
 
-            string envPart = string.Empty;
-            if (config.Environment is { Count: > 0 })
+                if (!await DockerImageExists(image))
+                {
+                    Console.WriteLine($"📦 Pulling missing image: {image}");
+                    await DockerPullImage(image);
+                }
+
+                string envPart = string.Empty;
+                if (config.Environment is { Count: > 0 })
+                {
+                    envPart = string.Join(" ", config.Environment.Select(kv => $"-e {kv.Key}=\"{kv.Value}\""));
+                }
+
+                string extraArgs = string.IsNullOrWhiteSpace(config.ExtraArgs) ? "" : $" {config.ExtraArgs}";
+
+                string runArgs = $"run -d -p {hostPort}:{containerPort} {envPart} {image}{extraArgs}";
+                Console.WriteLine($"Docker command: docker {runArgs}");
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "docker",
+                    Arguments = runArgs,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    throw new Exception("Failed to start Docker process");
+                }
+
+                string containerId = await process.StandardOutput.ReadLineAsync() ?? string.Empty;
+                await process.WaitForExitAsync();
+
+                if (string.IsNullOrWhiteSpace(containerId) || process.ExitCode != 0)
+                {
+                    string errorOutput = await process.StandardError.ReadToEndAsync();
+                    throw new Exception($"❌ Docker run failed: {errorOutput}");
+                }
+
+                return (containerId.Trim(), hostPort);
+            }
+            catch (Exception ex)
             {
-                envPart = string.Join(" ", config.Environment.Select(kv => $"-e {kv.Key}=\"{kv.Value}\""));
+                Console.WriteLine($"Docker işlemi başarısız: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                throw;
             }
+        }
 
-            string extraArgs = string.IsNullOrWhiteSpace(config.ExtraArgs) ? "" : $" {config.ExtraArgs}";
-
-            string runArgs = $"run -d -p {hostPort}:{containerPort} {envPart} {image}{extraArgs}";
-
+        private async Task CheckDockerAvailabilityAsync()
+        {
             var psi = new ProcessStartInfo
             {
                 FileName = "docker",
-                Arguments = runArgs,
+                Arguments = "--version",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
-            using var process = Process.Start(psi);
-            string containerId = await process.StandardOutput.ReadLineAsync() ?? string.Empty;
-            await process.WaitForExitAsync();
-
-            if (string.IsNullOrWhiteSpace(containerId) || process.ExitCode != 0)
+            try
             {
-                string errorOutput = await process.StandardError.ReadToEndAsync();
-                throw new Exception($"❌ Docker run failed: {errorOutput}");
-            }
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    throw new Exception("Failed to start Docker process during version check");
+                }
 
-            return (containerId.Trim(), hostPort);
+                string output = await process.StandardOutput.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    string errorOutput = await process.StandardError.ReadToEndAsync();
+                    throw new Exception($"Docker version check failed: {errorOutput}");
+                }
+
+                Console.WriteLine($"Docker version: {output.Trim()}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Docker kullanılamıyor: {ex.Message}");
+                throw new Exception("Docker is not available or correctly configured", ex);
+            }
         }
 
         public async Task StopAndRemoveContainerAsync(string containerId)

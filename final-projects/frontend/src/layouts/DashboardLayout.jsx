@@ -8,6 +8,7 @@ import {
   CloudUpload as FileIcon,
   Dashboard as DashboardIcon,
   Assignment as AssignmentIcon,
+  Task as TaskIcon,
   ExpandLess,
   ExpandMore,
   AccountCircle,
@@ -43,7 +44,7 @@ const DashboardLayout = () => {
         { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
       ]
     },
-    { text: 'Files', icon: <FileIcon />, path: '/files' },
+    { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
   ];
 
   const handleMenuItemClick = (item) => {
@@ -73,7 +74,6 @@ const DashboardLayout = () => {
 
   const drawer = (
     <div>
-
       <List>
         {menuItems.map((item) => (
           <React.Fragment key={item.text}>

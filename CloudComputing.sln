@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{AE9D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityService", "final-projects\backend\IdentityService\IdentityService.csproj", "{6DF43051-586F-A247-A890-3F039057D3BC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceManagerService", "final-projects\backend\ResourceManagerService\ResourceManagerService.csproj", "{1CB6BAAC-3E47-C3CE-2BF8-E10D6F0A400F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,6 +20,10 @@ Global
 		{6DF43051-586F-A247-A890-3F039057D3BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DF43051-586F-A247-A890-3F039057D3BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DF43051-586F-A247-A890-3F039057D3BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CB6BAAC-3E47-C3CE-2BF8-E10D6F0A400F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CB6BAAC-3E47-C3CE-2BF8-E10D6F0A400F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CB6BAAC-3E47-C3CE-2BF8-E10D6F0A400F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CB6BAAC-3E47-C3CE-2BF8-E10D6F0A400F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -25,8 +31,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{AE9DB913-D5DC-7601-A661-967B8EAEE52E} = {268FFA4B-0B65-06D4-7549-F59284F78696}
 		{6DF43051-586F-A247-A890-3F039057D3BC} = {AE9DB913-D5DC-7601-A661-967B8EAEE52E}
+		{1CB6BAAC-3E47-C3CE-2BF8-E10D6F0A400F} = {AE9DB913-D5DC-7601-A661-967B8EAEE52E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {FAA930FF-72B9-45F4-957D-C2415CD40907}
+		SolutionGuid = {0AFC70D1-E7EC-4820-83A9-7AC7CD67B8F8}
 	EndGlobalSection
 EndGlobal

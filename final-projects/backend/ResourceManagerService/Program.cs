@@ -38,6 +38,17 @@ builder.Services.AddSingleton<DockerService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Apply migrations and seed database
@@ -47,6 +58,9 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
     DbSeeder.Seed(dbContext);
 }
+
+// Enable CORS
+app.UseCors();
 
 // ProblemDetails middleware (global exception + validation response)
 app.UseProblemDetails();
