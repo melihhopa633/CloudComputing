@@ -7,7 +7,6 @@ using ResourceManagerService.Features.Task.CreateTask;
 using ResourceManagerService.Features.Task.DeleteTask;
 using ResourceManagerService.Features.Task.GetAllTask;
 using ResourceManagerService.Features.Task.GetTask;
-using ResourceManagerService.Features.Task.GetAllTaskByUserId;
 
 namespace ResourceManagerService.Features.Task
 {
