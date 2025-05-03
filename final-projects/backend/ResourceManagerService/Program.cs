@@ -7,6 +7,7 @@ using Serilog;
 using Hellang.Middleware.ProblemDetails;
 using Npgsql;
 using ResourceManagerService.Common;
+using ResourceManagerService.Services;
 
 NpgsqlConnection.GlobalTypeMapper.EnableDynamicJson();
 
@@ -32,6 +33,7 @@ builder.Services.AddProblemDetails(opt =>
     opt.IncludeExceptionDetails = (ctx, ex) => builder.Environment.IsDevelopment();
 });
 builder.Services.AddControllers();
+builder.Services.AddSingleton<DockerService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

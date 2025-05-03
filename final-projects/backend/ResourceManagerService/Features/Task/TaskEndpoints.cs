@@ -7,6 +7,7 @@ using ResourceManagerService.Features.Task.CreateTask;
 using ResourceManagerService.Features.Task.DeleteTask;
 using ResourceManagerService.Features.Task.GetAllTask;
 using ResourceManagerService.Features.Task.GetTask;
+using ResourceManagerService.Features.Task.GetAllTaskByUserId;
 
 namespace ResourceManagerService.Features.Task
 {
@@ -40,6 +41,12 @@ namespace ResourceManagerService.Features.Task
                 return result
                     ? Results.Ok(ApiResponse.SuccessResponse("Task deleted"))
                     : Results.NotFound(ApiResponse.Fail("Task not found"));
+            });
+
+            app.MapGet("/api/tasks/user/{userId:guid}", async (Guid userId, ISender sender) =>
+            {
+                var tasks = await sender.Send(new GetAllTaskByUserIdQuery(userId));
+                return Results.Ok(ApiResponse.SuccessResponse("User's tasks listed", tasks));
             });
         }
     }
