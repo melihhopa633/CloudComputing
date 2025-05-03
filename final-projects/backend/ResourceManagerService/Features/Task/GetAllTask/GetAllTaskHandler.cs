@@ -17,6 +17,7 @@ namespace ResourceManagerService.Features.Task
 
         public async Task<List<Entities.Task>> Handle(GetAllTaskQuery request, CancellationToken cancellationToken)
         {
+            // Events zaten Task ile birlikte jsonb olarak dönecek
             return _dbContext.Tasks.ToList();
         }
     }

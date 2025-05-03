@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using ResourceManagerService.Entities;
 
 namespace ResourceManagerService.Persistence
@@ -11,7 +9,7 @@ namespace ResourceManagerService.Persistence
             // Örnek seed: Eğer hiç task yoksa bir tane ekle
             if (!context.Tasks.Any())
             {
-                var task = new Task
+                var task = new ResourceManagerService.Entities.Task
                 {
                     Id = Guid.NewGuid(),
                     UserId = Guid.NewGuid(),
@@ -19,7 +17,15 @@ namespace ResourceManagerService.Persistence
                     ContainerId = "",
                     Port = 8888,
                     StartTime = DateTime.UtcNow,
-                    Status = "Stopped"
+                    Status = "Stopped",
+                    Events = new List<TaskEventData>
+                    {
+                        new TaskEventData
+                        {
+                            Type = "Created",
+                            Details = "Task created successfully"
+                        }
+                    }
                 };
                 context.Tasks.Add(task);
                 context.SaveChanges();

@@ -4,6 +4,7 @@ using ResourceManagerService.Persistence;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace ResourceManagerService.Features.Task
 {
@@ -22,10 +23,18 @@ namespace ResourceManagerService.Features.Task
                 Id = Guid.NewGuid(),
                 UserId = request.UserId,
                 ServiceType = request.ServiceType,
-                ContainerId = string.Empty, // Docker entegrasyonu ile doldurulacak
-                Port = 0, // Docker entegrasyonu ile doldurulacak
+                ContainerId = request.ContainerId,
+                Port = request.Port,
                 StartTime = DateTime.UtcNow,
-                Status = "Running"
+                Status = "Running",
+                Events = new List<TaskEventData>
+                {
+                    new TaskEventData
+                    {
+                        Type = "Created",
+                        Details = "Task created successfully"
+                    }
+                }
             };
             _dbContext.Tasks.Add(task);
             await _dbContext.SaveChangesAsync(cancellationToken);

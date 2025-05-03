@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace ResourceManagerService.Entities
 {
@@ -15,6 +16,14 @@ namespace ResourceManagerService.Entities
         public TimeSpan? Duration { get; set; }
         public string Status { get; set; } // Running, Stopped, Error
 
-        public List<TaskEvent> Events { get; set; } = new();
+        public List<TaskEventData> Events { get; set; } = new();
+    }
+
+    public class TaskEventData
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public string Type { get; set; }
+        public string Details { get; set; }
     }
 } 
