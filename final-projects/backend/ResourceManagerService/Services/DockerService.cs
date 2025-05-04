@@ -148,14 +148,17 @@ namespace ResourceManagerService.Services
 
                 string containerId = await process.StandardOutput.ReadLineAsync() ?? string.Empty;
                 await process.WaitForExitAsync();
-
+        
+                // fetch first 12 characters of containerId
+                containerId = containerId.Length > 12 ? containerId.Substring(0, 12) : containerId;
+                
                 if (string.IsNullOrWhiteSpace(containerId) || process.ExitCode != 0)
                 {
                     string errorOutput = await process.StandardError.ReadToEndAsync();
                     throw new Exception($"❌ Docker run failed: {errorOutput}");
                 }
-
-                return (containerId.Trim(), hostPort);
+                
+                return (containerId, hostPort);
             }
             catch (Exception ex)
             {
