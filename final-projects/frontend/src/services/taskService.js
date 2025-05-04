@@ -15,7 +15,7 @@ const taskService = {
     getAllTasks: async (status) => {
         try {
             console.log('Fetching tasks from:', `${api.defaults.baseURL}/tasks`);
-            const response = await api.get('/tasks', {
+            const response = await api.get('/tasks?status=Running', {
                 params: {
                     status: status
                 }
