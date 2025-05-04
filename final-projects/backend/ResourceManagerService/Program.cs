@@ -34,6 +34,7 @@ builder.Services.AddProblemDetails(opt =>
 });
 builder.Services.AddControllers();
 builder.Services.AddSingleton<DockerService>();
+builder.Services.AddHttpClient<MetricsService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

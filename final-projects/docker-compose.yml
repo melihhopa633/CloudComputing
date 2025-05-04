@@ -22,7 +22,7 @@ services:
         condition: service_started
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/auth/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/auth/health"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -48,7 +48,7 @@ services:
         condition: service_started
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/tasks" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/tasks"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -67,7 +67,7 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -85,7 +85,7 @@ services:
       - pgdata_resource:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -99,6 +99,28 @@ services:
       - "5341:80"
     volumes:
       - seqdata:/data
+    restart: unless-stopped
+
+  docker_stats_exporter:
+    image: wywywywy/docker_stats_exporter:latest
+    container_name: docker_stats_exporter
+    privileged: true
+    ports:
+      - "9487:9487"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    privileged: true
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - docker_stats_exporter
     restart: unless-stopped
 
 volumes:
