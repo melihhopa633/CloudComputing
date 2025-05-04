@@ -12,10 +12,14 @@ const api = axios.create({
 
 const taskService = {
     // Get all tasks
-    getAllTasks: async () => {
+    getAllTasks: async (status) => {
         try {
             console.log('Fetching tasks from:', `${api.defaults.baseURL}/tasks`);
-            const response = await api.get('/tasks');
+            const response = await api.get('/tasks', {
+                params: {
+                    status: status
+                }
+            });
             console.log('Tasks response:', response.data);
             return response.data;
         } catch (error) {

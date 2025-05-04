@@ -24,7 +24,7 @@ const AllTasks = () => {
 
    const fetchTasks = async () => {
       try {
-         const response = await taskService.getAllTasks();
+         const response = await taskService.getAllTasks('Running');
          setTasks(response.data);
          setLoading(false);
       } catch (err) {
@@ -48,7 +48,7 @@ const AllTasks = () => {
    return (
       <Box sx={{ p: 3 }}>
          <Typography variant="h5" gutterBottom>
-            All Tasks
+            Running Tasks
          </Typography>
          <TableContainer component={Paper}>
             <Table>
