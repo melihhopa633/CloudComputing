@@ -13,90 +13,60 @@ namespace ResourceManagerService.Services
             public string? ExtraArgs { get; set; }
         }
 
-        private static readonly Dictionary<string, DockerServiceConfig> ServiceMap = new()
+private static readonly Dictionary<string, DockerServiceConfig> ServiceMap = new()
+{
+    {
+        "filebrowser", new DockerServiceConfig
         {
-            {
-                "jupyter", new DockerServiceConfig
-                {
-                    Image = "jupyter/base-notebook", ContainerPort = 8888,
-                    ExtraArgs = "start-notebook.sh --NotebookApp.token=''"
-                }
-            },
+            Image = "filebrowser/filebrowser",
+            ContainerPort = 80
+        }
+    },
+    {
+        "theia", new DockerServiceConfig
+        {
+            Image = "elswork/theia",
+            ContainerPort = 3000
+        }
+    },
+    {
+        "drawio", new DockerServiceConfig
+        {
+            Image = "fjudith/draw.io",
+            ContainerPort = 8080
+        }
+    },
+    {
+        "excalidraw", new DockerServiceConfig
+        {
+            Image = "excalidraw/excalidraw",
+            ContainerPort = 80
+        }
+    },
+    {
+        "photopea", new DockerServiceConfig
+        {
+            Image = "kovaszab/photopea",
+            ContainerPort = 8887
+        }
+    },
+    {
+        "jsoneditor", new DockerServiceConfig
+        {
+            Image = "djmattyg007/jsoneditor",
+            ContainerPort = 80
+        }
+    },
+    // 1) Etherpad-lite: Basit ortak metin düzenleyici
+    {
+        "etherpad", new DockerServiceConfig
+        {
+            Image = "etherpad/etherpad",
+            ContainerPort = 9001
+        }
+    },
+};
 
-            {
-                "filebrowser", new DockerServiceConfig
-                {
-                    Image = "filebrowser/filebrowser", ContainerPort = 80
-                }
-            },
-
-            {
-                "theia", new DockerServiceConfig
-                {
-                    Image = "elswork/theia", ContainerPort = 3000
-                }
-            },
-
-            {
-                "drawio", new DockerServiceConfig
-                {
-                    Image = "fjudith/draw.io", ContainerPort = 8080
-                }
-            },
-
-            {
-                "excalidraw", new DockerServiceConfig
-                {
-                    Image = "excalidraw/excalidraw", ContainerPort = 80
-                }
-            },
-
-            {
-                "photopea", new DockerServiceConfig
-                {
-                    Image = "kovaszab/photopea", ContainerPort = 8887
-                }
-            },
-
-            {
-                "adminer", new DockerServiceConfig
-                {
-                    Image = "adminer", ContainerPort = 8080
-                }
-            },
-
-            {
-                "directus", new DockerServiceConfig
-                {
-                    Image = "directus/directus", ContainerPort = 8055,
-                    Environment = new()
-                    {
-                        { "ADMIN_EMAIL", "admin@example.com" },
-                        { "ADMIN_PASSWORD", "admin123" },
-                        { "KEY", "supersecretkey" },
-                        { "SECRET", "supersecretsecret" }
-                    }
-                }
-            },
-            // ✅ JSON düzenleyici ve test sayfası (frontend-dev için müthiş)
-            {
-                "jsoneditor", new DockerServiceConfig
-                {
-                    Image = "djmattyg007/jsoneditor", ContainerPort = 80
-                }
-            },
-            // ✅ Markdown not alma / paylaşma uygulaması (Notion alternatifi)
-            { "trilium", new DockerServiceConfig {
-                Image = "zadam/trilium", ContainerPort = 8080 }
-            },
-            // ✅ Snapdrop: Cihazlar arası dosya paylaşımı
-            {
-                "snapdrop", new DockerServiceConfig
-                {
-                    Image = "linuxserver/snapdrop", ContainerPort = 80
-                }
-            }
-        };
 
 
         public async Task<(string containerId, int hostPort)> StartContainerAsync(string serviceType)
