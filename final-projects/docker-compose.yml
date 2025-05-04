@@ -12,7 +12,7 @@ services:
       - Jwt__Issuer=IdentityService
       - Jwt__Audience=IdentityServiceUsers
       - Jwt__ExpireHours=2
-      - Serilog__SeqServerUrl=http://seq:5341
+      - Serilog__SeqServerUrl=http://seq:80
     ports:
       - "5001:8080"
     depends_on:
@@ -21,6 +21,8 @@ services:
       seq:
         condition: service_started
     restart: unless-stopped
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/auth/health"]
       interval: 10s
@@ -36,7 +38,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres_resource;Port=5432;Database=resource_db;Username=postgres;Password=postgres
-      - Serilog__SeqServerUrl=http://seq:5341
+      - Serilog__SeqServerUrl=http://seq:80
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
@@ -47,6 +49,8 @@ services:
       seq:
         condition: service_started
     restart: unless-stopped
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/tasks"]
       interval: 10s
@@ -71,6 +75,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   postgres_resource:
     image: postgres:16
@@ -89,17 +95,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   seq:
     image: datalust/seq:latest
     container_name: seq
     environment:
       ACCEPT_EULA: "Y"
-    ports:
-      - "5341:80"
+    expose:
+      - "80" # İç port
     volumes:
       - seqdata:/data
     restart: unless-stopped
+    networks:
+      - app-network
 
   docker_stats_exporter:
     image: wywywywy/docker_stats_exporter:latest
@@ -110,6 +120,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
+    networks:
+      - app-network
 
   prometheus:
     image: prom/prometheus:latest
@@ -122,6 +134,25 @@ services:
     depends_on:
       - docker_stats_exporter
     restart: unless-stopped
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "9098:80" # HOST:CONTAINER
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - seq
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   pgdata:
