@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, List, ListItem, ListItemIcon, ListItemText, ListItemButton, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Dashboard as DashboardIcon, People as PeopleIcon, Security as SecurityIcon, Assignment as AssignmentIcon } from '@mui/icons-material';
+import { Dashboard as DashboardIcon, People as PeopleIcon, Security as SecurityIcon, Assignment as AssignmentIcon, Monitor as MonitorIcon } from '@mui/icons-material';
 
 const Sidebar = () => {
     const navigate = useNavigate();
@@ -12,7 +12,9 @@ const Sidebar = () => {
         { text: 'Users', icon: <PeopleIcon />, path: '/users' },
         { text: 'Roles', icon: <SecurityIcon />, path: '/roles' },
         { text: 'User Roles', icon: <AssignmentIcon />, path: '/user-roles' },
+        { text: 'Log Viewer', icon: <MonitorIcon />, path: '/log-viewer' },
     ];
+
 
     return (
         <Box sx={{

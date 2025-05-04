@@ -41,6 +41,7 @@ const LOGO_MAP = {
    jsoneditor: '/logos/jsoneditor-logo.png',
    trilium: '/logos/trilium-logo.png',
    snapdrop: '/logos/snapdrop-logo.png',
+   etherpad: '/logos/etherpad-logo.png',
 
    // Diğer servisler için ekle
 };

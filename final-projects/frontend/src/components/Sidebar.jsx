@@ -8,6 +8,8 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Link, useLocation } from 'react-router-dom';
+import LogViewerSidebar from './LogViewerSidebar';
+import MonitorIcon from '@mui/icons-material/Monitor';
 
 const Sidebar = () => {
   const [openRoles, setOpenRoles] = useState(false);
@@ -24,7 +26,9 @@ const Sidebar = () => {
         { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
       ]
     },
-    { text: 'Files', icon: <FolderIcon />, path: '/files' },
+    { text: 'Log Viewer', icon: <MonitorIcon />, path: '/log-viewer' },
+
+
   ];
 
   const handleClick = (item) => {
@@ -102,6 +106,10 @@ const Sidebar = () => {
           </React.Fragment>
         ))}
       </List>
+      {/* SEQ Logları Göster butonu ve iframe alanı */}
+      <Box sx={{ px: 2, mt: 2 }}>
+        <LogViewerSidebar />
+      </Box>
     </Box>
   );
 };

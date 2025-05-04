@@ -14,9 +14,10 @@ import UserRolesPage from "./pages/UserRolesPage";
 import FilesPage from "./pages/FilesPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import TasksPage from "./pages/TasksPage";
+import LogViewerSidebar from "./components/LogViewerSidebar";
 
 function App() {
-  return (
+  return (  
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -28,6 +29,7 @@ function App() {
           <Route path="roles/user-roles" element={<UserRolesPage />} />
           <Route path="files" element={<FilesPage />} />
           <Route path="tasks" element={<TasksPage />} />
+          <Route path="log-viewer" element={<LogViewerSidebar />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

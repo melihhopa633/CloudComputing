@@ -12,6 +12,7 @@ import {
   ExpandLess,
   ExpandMore,
   AccountCircle,
+  Monitor as LogViewerIcon,
 } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -45,6 +46,7 @@ const DashboardLayout = () => {
       ]
     },
     { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
+    { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' }
   ];
 
   const handleMenuItemClick = (item) => {

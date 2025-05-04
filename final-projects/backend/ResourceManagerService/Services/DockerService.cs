@@ -43,13 +43,7 @@ private static readonly Dictionary<string, DockerServiceConfig> ServiceMap = new
             ContainerPort = 80
         }
     },
-    {
-        "photopea", new DockerServiceConfig
-        {
-            Image = "kovaszab/photopea",
-            ContainerPort = 8887
-        }
-    },
+  
     {
         "jsoneditor", new DockerServiceConfig
         {

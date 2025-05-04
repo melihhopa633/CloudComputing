@@ -12,6 +12,7 @@ import AllTasks from './pages/tasks/AllTasks';
 import CreateTask from './pages/tasks/CreateTask';
 import TaskStatus from './pages/tasks/TaskStatus';
 import UserTasks from './pages/tasks/UserTasks';
+import LogViewerPage from './pages/LogViewerPage';
 
 const App = () => {
     return (
@@ -31,6 +32,7 @@ const App = () => {
                             <Route path="status" element={<TaskStatus />} />
                             <Route path="user" element={<UserTasks />} />
                         </Route>
+                        <Route path="log-viewer" element={<LogViewerPage />} />
                     </Route>
                 </Routes>
             </Router>
