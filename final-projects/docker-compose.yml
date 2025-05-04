@@ -24,7 +24,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/auth/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/auth/health" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -52,7 +52,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/tasks"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/tasks" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -71,7 +71,7 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -91,7 +91,7 @@ services:
       - pgdata_resource:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -147,6 +147,24 @@ services:
     depends_on:
       - seq
     restart: unless-stopped
+    networks:
+      - app-network
+
+  blockchain-node:
+    image: trufflesuite/ganache-cli
+    command:
+      - --networkId
+      - "1337"
+      - --port
+      - "8545"
+      - --host
+      - "0.0.0.0"
+      - --db
+      - "/data"
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./ganache_data:/data
     networks:
       - app-network
 
