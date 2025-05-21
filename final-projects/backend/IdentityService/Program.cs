@@ -43,7 +43,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
@@ -104,8 +104,8 @@ using (var scope = app.Services.CreateScope())
 // Use Exception Middleware
 app.UseMiddleware<ExceptionsMiddleware>();
 
-// Enable CORS
-app.UseCors();
+// Enable CORS with named policy
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

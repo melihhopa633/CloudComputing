@@ -24,7 +24,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
         var user = await _context.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Username == command.Username, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Email == command.Email, cancellationToken);
 
         if (user == null)
             throw new UnauthorizedException("Invalid username or password");

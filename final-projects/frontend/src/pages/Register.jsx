@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import authService from "../services/authService";
 
 const Register = () => {
-  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -11,7 +11,7 @@ const Register = () => {
     e.preventDefault();
     setError("");
     try {
-      await authService.register({ username, email, password });
+      await authService.register({ FullName: fullName, Email: email, Password: password });
       window.location.href = "/login";
     } catch (err) {
       setError("Registration failed. Please check your information.");
@@ -59,11 +59,11 @@ const Register = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
               className="w-full px-4 py-3 rounded-lg bg-[#010B1D] border border-[#0066FF]/20 text-white placeholder-gray-500
               focus:outline-none focus:border-[#0066FF] transition-colors"
-              placeholder="Username"
+              placeholder="Full Name"
               required
             />
 

@@ -15,9 +15,9 @@ import FilesPage from "./pages/FilesPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import TasksPage from "./pages/TasksPage";
 import LogViewerSidebar from "./components/LogViewerSidebar";
-
+import Prometheus from "./pages/tasks/Prometheus";
 function App() {
-  return (  
+  return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -30,6 +30,7 @@ function App() {
           <Route path="files" element={<FilesPage />} />
           <Route path="tasks" element={<TasksPage />} />
           <Route path="log-viewer" element={<LogViewerSidebar />} />
+          <Route path="prometheus" element={<Prometheus />} />
         </Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

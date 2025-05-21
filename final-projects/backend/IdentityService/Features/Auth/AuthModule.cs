@@ -1,6 +1,7 @@
 using Carter;
 using IdentityService.Features.Auth.Login;
 using IdentityService.Features.Auth.RefreshToken;
+using IdentityService.Features.Auth.Register;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -18,6 +19,16 @@ public class AuthModule : CarterModule
             return Results.Ok(response);
         })
         .WithName("Login")
+        .WithOpenApi()
+        .AllowAnonymous();
+
+
+         app.MapPost("/api/auth/register", async (RegisterCommand command, ISender mediator) =>
+        {
+            var response = await mediator.Send(command);
+            return Results.Ok(response);
+        })
+        .WithName("Register")
         .WithOpenApi()
         .AllowAnonymous();
 

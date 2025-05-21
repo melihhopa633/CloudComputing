@@ -1,11 +1,16 @@
+// RegisterCommandValidator.cs
+// ... 
 using FluentValidation;
 
-namespace IdentityService.Features.Auth.Login;
+namespace IdentityService.Features.Auth.Register;
 
-public class LoginCommandValidator : AbstractValidator<LoginCommand>
+public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
-    public LoginCommandValidator()
+    public RegisterCommandValidator()
     {
+        RuleFor(x => x.FullName)
+            .NotEmpty().WithMessage("Name is required");
+
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required")
             .EmailAddress().WithMessage("Invalid email address");

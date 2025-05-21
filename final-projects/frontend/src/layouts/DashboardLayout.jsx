@@ -13,6 +13,7 @@ import {
   ExpandMore,
   AccountCircle,
   Monitor as LogViewerIcon,
+  MonitorHeart as PrometheusIcon,
 } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -46,7 +47,8 @@ const DashboardLayout = () => {
       ]
     },
     { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
-    { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' }
+    { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
+    { text: 'Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
   ];
 
   const handleMenuItemClick = (item) => {

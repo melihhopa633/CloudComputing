@@ -66,7 +66,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
@@ -86,12 +86,32 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - pgdata_resource:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  postgres_blockchain:
+    image: postgres:16
+    container_name: postgres_blockchain
+    environment:
+      POSTGRES_DB: blockchain_metrics
+      POSTGRES_USER: blockchain
+      POSTGRES_PASSWORD: blockchain
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata_blockchain:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blockchain"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -150,21 +170,24 @@ services:
     networks:
       - app-network
 
-  blockchain-node:
-    image: trufflesuite/ganache-cli
-    command:
-      - --networkId
-      - "1337"
-      - --port
-      - "8545"
-      - --host
-      - "0.0.0.0"
-      - --db
-      - "/data"
+  blockchainservice:
+    build: ./backend/BlockchainService
+    container_name: blockchainservice
+    env_file:
+      - .env
+    environment:
+      - PG_HOST=postgres_blockchain
+      - PG_USER=blockchain
+      - PG_PASSWORD=blockchain
+      - PG_DATABASE=blockchain_metrics
+      - PG_PORT=5432
+      - RPC_URL=http://host.docker.internal:8545
     ports:
-      - "8545:8545"
-    volumes:
-      - ./ganache_data:/data
+      - "4002:4002"
+    depends_on:
+      postgres_blockchain:
+        condition: service_healthy
+    restart: unless-stopped
     networks:
       - app-network
 
@@ -175,4 +198,6 @@ networks:
 volumes:
   pgdata:
   pgdata_resource:
+  pgdata_blockchain:
   seqdata:
+  mysql_data:

@@ -6,7 +6,7 @@ namespace IdentityService.Features.Auth.Login;
 public class LoginCommand : IRequest<LoginResponse>
 {
     [Required]
-    public required string Username { get; set; }
+    public required string Email { get; set; }
     
     [Required]
     public required string Password { get; set; }

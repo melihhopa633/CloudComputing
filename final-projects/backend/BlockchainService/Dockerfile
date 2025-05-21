@@ -3,11 +3,23 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --production
+# Install nodemon globally
+RUN npm install -g nodemon
 
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source code
 COPY . .
 
-EXPOSE 4000
+# Deploy contract
+RUN node deploy.js || true
 
-CMD ["npm", "start"] 
+# Expose port
+EXPOSE 4002
+
+# Start the application with nodemon
+CMD ["nodemon", "--legacy-watch", "index.js"]
