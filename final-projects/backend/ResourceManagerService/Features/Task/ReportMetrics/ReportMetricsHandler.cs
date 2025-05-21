@@ -6,41 +6,38 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Http;
-using Newtonsoft.Json.Linq;
+using Serilog;
 
-namespace ResourceManagerService.Features.Task.DeleteTask
+namespace ResourceManagerService.Features.Task.ReportMetrics
 {
-    public class DeleteTaskHandler : IRequestHandler<DeleteTaskCommand, bool>
+    public class ReportMetricsHandler : IRequestHandler<ReportMetricsCommand, bool>
     {
         private readonly AppDbContext _dbContext;
-        private readonly DockerService _dockerService;
         private readonly MetricsService _metricsService;
         private readonly UserInfoService _userInfoService;
         private readonly HttpClient _httpClient;
-        private readonly string _blockchainServiceBaseUrl = "http://localhost:4002"; // Gerekirse appsettings'ten alınabilir
-        public DeleteTaskHandler(AppDbContext dbContext, DockerService dockerService, MetricsService metricsService, UserInfoService userInfoService, HttpClient httpClient)
+        private readonly string _blockchainServiceBaseUrl = "http://localhost:4002";
+        public ReportMetricsHandler(AppDbContext dbContext, MetricsService metricsService, UserInfoService userInfoService, HttpClient httpClient)
         {
             _dbContext = dbContext;
-            _dockerService = dockerService;
             _metricsService = metricsService;
             _userInfoService = userInfoService;
             _httpClient = httpClient;
         }
 
-        public async Task<bool> Handle(DeleteTaskCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(ReportMetricsCommand request, CancellationToken cancellationToken)
         {
             var task = await _dbContext.Tasks.FindAsync(new object[] { request.Id }, cancellationToken);
             if (task == null) return false;
 
-            // Container'ın son RAM ve CPU kullanımını ölç
+            // Container'ın RAM ve CPU kullanımını ölç
             string memoryUsage = "0";
             string cpuUsage = "0";
-            try 
+            try
             {
                 if (!string.IsNullOrWhiteSpace(task.ContainerId))
                 {
                     memoryUsage = await _metricsService.GetContainerMemoryUsageAsync(task.ContainerId);
-                    // noktadan sonrasını sil
                     if (memoryUsage.Contains('.'))
                         memoryUsage = memoryUsage.Substring(0, memoryUsage.IndexOf('.'));
                     cpuUsage = await _metricsService.GetContainerCpuUsageAsync(task.ContainerId);
@@ -48,35 +45,17 @@ namespace ResourceManagerService.Features.Task.DeleteTask
             }
             catch (Exception ex)
             {
-                // Metrik okuma hatası olursa "-1" olarak işaretle
+                Log.Error(ex, "[ReportMetricsHandler] Container metrics read error for TaskId {TaskId}", task.Id);
                 memoryUsage = "-1";
                 cpuUsage = "-1";
             }
 
-            // Docker container'ı durdur ve sil
-            if (!string.IsNullOrWhiteSpace(task.ContainerId))
-                await _dockerService.StopAndRemoveContainerAsync(task.ContainerId);
-
-            task.Status = "Deleted";
-            task.StopTime = DateTime.UtcNow;
-            task.Duration = task.StopTime - task.StartTime;
-            var list = task.Events.ToList();
-            
             // RAM'i MB'a çevir
             string memoryMB = "-1";
             if (double.TryParse(memoryUsage, out double memBytes) && memBytes >= 0)
             {
                 memoryMB = (memBytes / (1024 * 1024)).ToString("F2");
             }
-            
-            list.Add(new TaskEventData  
-            {
-                Type = "Deleted",
-                Details = $"Task deleted and container stopped. Last metrics - Memory: {memoryMB} MB, CPU: {cpuUsage}"
-            });
-            task.Events = list;
-           
-            await _dbContext.SaveChangesAsync(cancellationToken);
 
             // Kullanıcı bilgisi çek
             string userEmail = string.Empty;
@@ -89,6 +68,7 @@ namespace ResourceManagerService.Features.Task.DeleteTask
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "[ReportMetricsHandler] User info fetch error for UserId {UserId}", task.UserId);
                 userEmail = "unknown";
                 userFullName = "unknown";
             }
@@ -111,6 +91,7 @@ namespace ResourceManagerService.Features.Task.DeleteTask
             }
             catch (Exception ex)
             {
+                Log.Error(ex, "[ReportMetricsHandler] Blockchain metrics post error for TaskId {TaskId}", task.Id);
                 // Blockchain'e yazılamadı, logla ama işlemi bozma
             }
 

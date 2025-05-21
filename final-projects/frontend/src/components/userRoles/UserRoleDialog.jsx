@@ -7,9 +7,45 @@ import {
     TextField,
     Button,
     Autocomplete,
+    Popper,
+    Paper,
 } from '@mui/material';
 import userService from '../../services/userService';
 import roleService from '../../services/roleService';
+
+// Custom Popper and Paper for dark dropdown
+const CustomPopper = (props) => {
+    // Make the dropdown as wide as the input
+    const anchorEl = props.anchorEl;
+    let width = 340;
+    if (anchorEl && anchorEl.clientWidth) {
+        width = anchorEl.clientWidth;
+    }
+    return <Popper {...props} style={{ zIndex: 1302, minWidth: width, width: width }} placement="bottom-start" />;
+};
+const CustomPaper = (props) => (
+  <Paper
+    {...props}
+    sx={{
+      bgcolor: 'rgba(10, 25, 47, 0.98)',
+      color: '#fff',
+      border: '1.5px solid #0066FF',
+      boxShadow: '0 8px 32px 0 rgba(0,102,255,0.15)',
+      '& .MuiAutocomplete-option': {
+        bgcolor: 'transparent',
+        color: '#fff',
+        '&[aria-selected="true"]': {
+          bgcolor: 'rgba(0,102,255,0.18)',
+          color: '#00BFFF',
+        },
+        '&:hover': {
+          bgcolor: 'rgba(0,102,255,0.12)',
+          color: '#00BFFF',
+        },
+      },
+    }}
+  />
+);
 
 const UserRoleDialog = ({
     open,
@@ -93,6 +129,8 @@ const UserRoleDialog = ({
                     value={selectedUser}
                     onChange={(event, newValue) => setSelectedUser(newValue)}
                     loading={loading}
+                    PopperComponent={CustomPopper}
+                    PaperComponent={CustomPaper}
                     renderInput={(params) => (
                         <TextField
                             {...params}
@@ -132,6 +170,8 @@ const UserRoleDialog = ({
                     value={selectedRole}
                     onChange={(event, newValue) => setSelectedRole(newValue)}
                     loading={loading}
+                    PopperComponent={CustomPopper}
+                    PaperComponent={CustomPaper}
                     renderInput={(params) => (
                         <TextField
                             {...params}

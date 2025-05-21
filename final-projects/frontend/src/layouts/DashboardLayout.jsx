@@ -74,7 +74,8 @@ const DashboardLayout = () => {
     navigate('/login');
   };
 
-  const username = 'kullanici_adi'; // TODO: Replace with real username from auth
+  // Get full name from localStorage (or context if available)
+  const fullName = localStorage.getItem('username') || 'User';
 
   const drawer = (
     <div>
@@ -147,18 +148,38 @@ const DashboardLayout = () => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          bgcolor: '#003366'
+          bgcolor: '#003366',
+          boxShadow: '0 4px 24px 0 rgba(0, 102, 255, 0.10)',
+          zIndex: 1201
         }}
       >
-        <Toolbar sx={{ justifyContent: 'flex-end' }}>
+        <Toolbar sx={{ justifyContent: 'flex-end', minHeight: 72 }}>
           <IconButton
             size="large"
             edge="end"
             color="inherit"
             onClick={handleMenu}
-            sx={{ ml: 2 }}
+            sx={{ ml: 2, p: 0 }}
           >
-            <AccountCircle fontSize="large" />
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #00BFFF 0%, #0066FF 100%)',
+                boxShadow: '0 2px 12px 0 rgba(0, 102, 255, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #fff',
+                transition: 'box-shadow 0.2s',
+                '&:hover': {
+                  boxShadow: '0 4px 24px 0 rgba(0, 102, 255, 0.25)',
+                },
+              }}
+            >
+              <AccountCircle fontSize="large" sx={{ color: '#fff' }} />
+            </Box>
           </IconButton>
           <Menu
             anchorEl={anchorEl}
@@ -166,9 +187,47 @@ const DashboardLayout = () => {
             onClose={handleClose}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            PaperProps={{
+              sx: {
+                mt: 1,
+                minWidth: 200,
+                borderRadius: 3,
+                boxShadow: '0 8px 32px 0 rgba(0, 102, 255, 0.15)',
+                bgcolor: '#fff',
+                p: 1,
+              }
+            }}
           >
-            <MenuItem disabled>{username}</MenuItem>
-            <MenuItem onClick={handleLogout}>Çıkış Yap</MenuItem>
+            <MenuItem disabled sx={{
+              fontWeight: 700,
+              color: '#003366',
+              fontSize: '1.08rem',
+              mb: 1,
+              borderRadius: 2,
+              background: 'linear-gradient(90deg, #e0f7fa 0%, #e3f2fd 100%)',
+            }}>
+              {fullName}
+            </MenuItem>
+            <MenuItem
+              onClick={handleLogout}
+              sx={{
+                color: '#fff',
+                fontWeight: 600,
+                borderRadius: 2,
+                background: 'linear-gradient(90deg, #00BFFF 0%, #0066FF 100%)',
+                boxShadow: '0 2px 8px 0 rgba(0, 102, 255, 0.10)',
+                px: 2,
+                py: 1.2,
+                mt: 0.5,
+                '&:hover': {
+                  background: 'linear-gradient(90deg, #0099cc 0%, #0055cc 100%)',
+                  color: '#fff',
+                },
+                transition: 'all 0.2s',
+              }}
+            >
+              Log out
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>

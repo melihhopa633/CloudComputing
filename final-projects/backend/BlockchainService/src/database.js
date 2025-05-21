@@ -144,7 +144,8 @@ async function addMetric({
   blockNumber,
 }) {
   try {
-    const result = await query(
+    const dbQuery = query;
+    const result = await dbQuery(
       `INSERT INTO metrics 
        (user_email, container_id, container_name, memory_mb, cpu_usage, tx_hash, block_number) 
        VALUES ($1, $2, $3, $4, $5, $6, $7) 
@@ -159,8 +160,10 @@ async function addMetric({
         blockNumber,
       ]
     );
-
-    return result.rows[0].id;
+    if (!result || !result[0] || !result[0].id) {
+      throw new Error("Metric insert did not return an id");
+    }
+    return result[0].id;
   } catch (error) {
     console.error("Error adding metric:", error.message);
     throw error;

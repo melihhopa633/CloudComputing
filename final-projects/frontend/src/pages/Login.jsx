@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import authService from "../services/authService";
 
 const CloudBlockchainIcon = () => (
   <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-6">
@@ -53,9 +54,26 @@ const CloudBlockchainIcon = () => (
 
 export default function Login() {
   const navigate = useNavigate();
-  const handleLogin = (e) => {
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    navigate("/dashboard");
+    setError("");
+    try {
+      const response = await authService.login(email, password);
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("username", response.username);
+        localStorage.setItem("email", response.email);
+        // Eğer backend'de fullname varsa onu da kaydet
+        // localStorage.setItem("fullName", response.fullName || response.username);
+      }
+      navigate("/dashboard");
+    } catch (err) {
+      setError("Login failed. Please check your credentials.");
+    }
   };
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#0a192f] to-black font-['Inter','Poppins',sans-serif]">
@@ -69,18 +87,22 @@ export default function Login() {
               {/* User icon */}
               <svg width="20" height="20" fill="none" stroke="#00BFFF" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 8-4 8-4s8 0 8 4" /></svg>
             </span>
-            <input type="text" placeholder="Email" className="w-full pl-12 pr-4 py-3 rounded-lg bg-[#112240] text-white placeholder:text-[#7dd3fc] focus:outline-none focus:ring-2 focus:ring-[#00BFFF] border border-transparent focus:border-[#00BFFF] transition-all duration-200 shadow-md" />
+            <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-lg bg-[#112240] text-white placeholder:text-[#7dd3fc] focus:outline-none focus:ring-2 focus:ring-[#00BFFF] border border-transparent focus:border-[#00BFFF] transition-all duration-200 shadow-md" />
           </div>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#00BFFF]">
               {/* Key icon */}
               <svg width="20" height="20" fill="none" stroke="#00BFFF" strokeWidth="2" viewBox="0 0 24 24"><circle cx="15" cy="15" r="4" /><path d="M15 11v-1a4 4 0 1 0-8 0v1" /><path d="M7 15h8" /></svg>
             </span>
-            <input type="password" placeholder="Password" className="w-full pl-12 pr-4 py-3 rounded-lg bg-[#112240] text-white placeholder:text-[#7dd3fc] focus:outline-none focus:ring-2 focus:ring-[#00BFFF] border border-transparent focus:border-[#00BFFF] transition-all duration-200 shadow-md" />
+            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-lg bg-[#112240] text-white placeholder:text-[#7dd3fc] focus:outline-none focus:ring-2 focus:ring-[#00BFFF] border border-transparent focus:border-[#00BFFF] transition-all duration-200 shadow-md" />
           </div>
           <button type="submit" className="mt-2 w-full py-3 rounded-lg bg-gradient-to-r from-[#00BFFF] to-[#0066FF] text-white font-bold text-lg shadow-lg hover:from-[#0099cc] hover:to-[#0055cc] focus:outline-none focus:ring-2 focus:ring-[#00BFFF] transition-all duration-200 drop-shadow-[0_0_12px_#00BFFF]">LOGIN</button>
+          {error && <div className="text-red-400 text-sm text-center mt-2">{error}</div>}
         </form>
-
+        <div className="text-center text-sm text-gray-400 mt-6">
+          Don't have an account?{' '}
+          <a href="/register" className="text-[#00BFFF] hover:underline font-semibold">Sign up</a>
+        </div>
       </div>
     </div>
   );

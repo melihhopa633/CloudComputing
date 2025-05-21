@@ -33,8 +33,17 @@ builder.Services.AddProblemDetails(opt =>
     opt.IncludeExceptionDetails = (ctx, ex) => builder.Environment.IsDevelopment();
 });
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<DockerService>();
 builder.Services.AddHttpClient<MetricsService>();
+builder.Services.AddHttpClient();
+builder.Services.AddSingleton<UserInfoService>(sp =>
+{
+    var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
+    var identityServiceBaseUrl = "http://localhost:5001"; // Gerekirse appsettings.json'dan alınabilir
+    return new UserInfoService(httpClient, identityServiceBaseUrl);
+});
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -60,8 +69,18 @@ using (var scope = app.Services.CreateScope())
     DbSeeder.Seed(dbContext);
 }
 
-// Enable CORS
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Enable CORS - moved before routing
 app.UseCors();
+
+// Add routing middleware
+app.UseRouting();
 
 // ProblemDetails middleware (global exception + validation response)
 app.UseProblemDetails();
@@ -69,16 +88,20 @@ app.UseProblemDetails();
 // Request/response logging
 app.UseSerilogRequestLogging();
 
-// Configure the HTTP request pipeline.
+// Map endpoints - both controller and Carter endpoints
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapCarter();
+});
+
+// HTTPS redirection after endpoints
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseHttpsRedirection();
 }
 
-app.MapCarter();
-
-app.UseHttpsRedirection();
-
+// Global middleware
 app.UseApiResponseMiddleware();
 
 app.Run();

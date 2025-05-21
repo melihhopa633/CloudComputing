@@ -8,6 +8,7 @@ using ResourceManagerService.Features.Task.DeleteTask;
 using ResourceManagerService.Features.Task.GetAllTask;
 using ResourceManagerService.Features.Task.GetAllTaskByUserId;
 using ResourceManagerService.Features.Task.GetTask;
+using ResourceManagerService.Features.Task.ReportMetrics;
 
 namespace ResourceManagerService.Features.Task
 {
@@ -59,6 +60,14 @@ namespace ResourceManagerService.Features.Task
             {
                 var tasks = await sender.Send(new GetAllTaskByUserIdQuery(userId));
                 return Results.Ok(ApiResponse.SuccessResponse("User's tasks listed", tasks));
+            });
+
+            app.MapPost("/api/tasks/{id:guid}/metrics", async (Guid id, ISender sender) =>
+            {
+                var result = await sender.Send(new ReportMetricsCommand(id));
+                return result
+                    ? Results.Ok(ApiResponse.SuccessResponse("Task metrics reported to blockchain"))
+                    : Results.NotFound(ApiResponse.Fail("Task not found"));
             });
         }
     }

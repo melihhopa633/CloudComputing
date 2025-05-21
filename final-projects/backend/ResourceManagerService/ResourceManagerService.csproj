@@ -4,6 +4,16 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <CopyOutputSymbolsToPublishDirectory>true</CopyOutputSymbolsToPublishDirectory>
+    <CopyOutputSymbolsToBuildDirectory>true</CopyOutputSymbolsToBuildDirectory>
+    <PublishTrimmed>false</PublishTrimmed>
+    <EnableDefaultItems>true</EnableDefaultItems>
+    <EnableDefaultContentItems>true</EnableDefaultContentItems>
+    <CopyRefAssembliesToPublishDirectory>true</CopyRefAssembliesToPublishDirectory>
+    <IncludeRazorContentInPack>true</IncludeRazorContentInPack>
+    <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
+    <StaticWebAssetBasePath>swagger</StaticWebAssetBasePath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +33,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.3" />
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
   <ItemGroup>
