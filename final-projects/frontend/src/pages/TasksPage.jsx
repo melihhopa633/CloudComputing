@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import SortIcon from '@mui/icons-material/Sort';
 import CloseIcon from '@mui/icons-material/Close';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import axios from 'axios';
 
 // Servis tipine göre logo eşlemesi (sadece bir kere bakılır)
 const LOGO_MAP = {
@@ -61,6 +62,7 @@ const TasksPage = () => {
    const [modalTitle, setModalTitle] = useState('');
    const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
    const userMenuOpen = Boolean(userMenuAnchorEl);
+   const [modalTaskId, setModalTaskId] = useState(null);
 
    useEffect(() => {
       fetchTasks();
@@ -161,12 +163,24 @@ const TasksPage = () => {
    const handleLogoClick = (task) => {
       setModalUrl(`http://localhost:${task.port}`);
       setModalTitle(task.serviceType);
+      setModalTaskId(task.id);
       setModalOpen(true);
    };
-   const handleModalClose = () => {
+   const handleModalClose = async () => {
+      // Metrics kaydını tetikle
+      if (modalTaskId) {
+         try {
+            await axios.post(`http://localhost:5002/api/report-metrics/${modalTaskId}`);
+            // İsterseniz burada bir toast veya alert gösterebilirsiniz
+            // alert('Task metrics reported!');
+         } catch (err) {
+            // alert('Failed to report metrics');
+         }
+      }
       setModalOpen(false);
       setModalUrl('');
       setModalTitle('');
+      setModalTaskId(null);
    };
 
    const handleUserMenuClick = (event) => {

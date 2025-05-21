@@ -193,18 +193,24 @@ const DashboardLayout = () => {
                 minWidth: 200,
                 borderRadius: 3,
                 boxShadow: '0 8px 32px 0 rgba(0, 102, 255, 0.15)',
-                bgcolor: '#fff',
+                bgcolor: 'rgba(10, 25, 47, 0.98)',
                 p: 1,
+                border: '1.5px solid #0066FF',
               }
+            }}
+            MenuListProps={{
+              disablePadding: true,
+              autoFocusItem: false,
             }}
           >
             <MenuItem disabled sx={{
               fontWeight: 700,
-              color: '#003366',
+              color: '#b3c6e0',
               fontSize: '1.08rem',
               mb: 1,
               borderRadius: 2,
-              background: 'linear-gradient(90deg, #e0f7fa 0%, #e3f2fd 100%)',
+              background: 'rgba(0, 20, 40, 0.7)',
+              opacity: 1,
             }}>
               {fullName}
             </MenuItem>
@@ -214,13 +220,13 @@ const DashboardLayout = () => {
                 color: '#fff',
                 fontWeight: 600,
                 borderRadius: 2,
-                background: 'linear-gradient(90deg, #00BFFF 0%, #0066FF 100%)',
-                boxShadow: '0 2px 8px 0 rgba(0, 102, 255, 0.10)',
+                background: 'none',
+                boxShadow: 'none',
                 px: 2,
                 py: 1.2,
                 mt: 0.5,
                 '&:hover': {
-                  background: 'linear-gradient(90deg, #0099cc 0%, #0055cc 100%)',
+                  background: 'linear-gradient(90deg, #00BFFF 0%, #0066FF 100%)',
                   color: '#fff',
                 },
                 transition: 'all 0.2s',

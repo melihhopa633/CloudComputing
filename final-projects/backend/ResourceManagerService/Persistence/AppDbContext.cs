@@ -9,6 +9,7 @@ namespace ResourceManagerService.Persistence
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<ResourceManagerService.Entities.Task> Tasks { get; set; }
+        public DbSet<ResourceManagerService.Entities.Metrics> Metrics { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -95,6 +95,27 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
                 // Blockchain'e yazılamadı, logla ama işlemi bozma
             }
 
+            // Metrics'i kendi veritabanına kaydet
+            try
+            {
+                var metrics = new Metrics
+                {
+                    UserEmail = userEmail,
+                    UserFullName = userFullName,
+                    ContainerId = task.ContainerId,
+                    ContainerName = task.ServiceType,
+                    MemoryMB = memoryMB,
+                    CpuUsage = cpuUsage,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _dbContext.Metrics.Add(metrics);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[ReportMetricsHandler] Metrics DB insert error for TaskId {TaskId}", task.Id);
+            }
+
             return true;
         }
     }
