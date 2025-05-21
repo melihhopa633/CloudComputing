@@ -36,7 +36,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<DockerService>();
-builder.Services.AddHttpClient<MetricsService>();
+builder.Services.AddHttpClient<MetricsService>(client => {
+    var prometheusUrl = builder.Configuration["MetricsService:PrometheusUrl"] ?? "http://localhost:9090";
+    client.BaseAddress = new Uri(prometheusUrl);
+});
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<UserInfoService>(sp =>
 {
