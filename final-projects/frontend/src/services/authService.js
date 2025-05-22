@@ -12,12 +12,27 @@ const authService = {
     const response = await axios.post(`${API_URL}/login`, { email, password });
     if (response.data.token) {
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("username", response.data.username);
+      localStorage.setItem("email", response.data.email);
+      localStorage.setItem("roles", JSON.stringify(response.data.roles));
     }
     return response.data;
   },
 
   logout() {
     localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    localStorage.removeItem("roles");
+  },
+
+  isAdmin() {
+    const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+    return roles.includes("admin");
+  },
+
+  getRoles() {
+    return JSON.parse(localStorage.getItem("roles") || "[]");
   },
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Collapse, useTheme } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -17,6 +17,7 @@ import {
 } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import authService from '../services/authService';
 
 const drawerWidth = 240;
 
@@ -28,27 +29,38 @@ const DashboardLayout = () => {
   const [openRoles, setOpenRoles] = useState(false);
   const [openUserManagement, setOpenUserManagement] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const openMenu = Boolean(anchorEl);
+
+  useEffect(() => {
+    // Check if user is admin when component mounts
+    setIsAdmin(authService.isAdmin());
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-    {
-      text: 'User Management',
-      icon: <PeopleIcon />,
-      hasSubMenu: true,
-      subItems: [
-        { text: 'Users', icon: <PeopleIcon />, path: '/users' },
-        { text: 'Roles', icon: <RoleIcon />, path: '/roles' },
-        { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
-      ]
-    },
-    { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
-    { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
-    { text: 'Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
+    // Admin only menu items
+    ...(isAdmin ? [
+      { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+      {
+        text: 'User Management',
+        icon: <PeopleIcon />,
+        hasSubMenu: true,
+        subItems: [
+          { text: 'Users', icon: <PeopleIcon />, path: '/users' },
+          { text: 'Roles', icon: <RoleIcon />, path: '/roles' },
+          { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
+        ]
+      },
+      { text: 'Files', icon: <FileIcon />, path: '/files' },
+      { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
+      { text: 'Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
+    ] : []),
+    // Menu items for all users
+    { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' }
   ];
 
   const handleMenuItemClick = (item) => {
@@ -70,12 +82,13 @@ const DashboardLayout = () => {
   };
 
   const handleLogout = () => {
+    authService.logout();
     setAnchorEl(null);
     navigate('/login');
   };
 
-  // Get full name from localStorage (or context if available)
-  const fullName = localStorage.getItem('username') || 'User';
+  // Get username from localStorage
+  const username = localStorage.getItem('username') || 'User';
 
   const drawer = (
     <div>
@@ -107,8 +120,7 @@ const DashboardLayout = () => {
                   null
               )}
             </ListItem>
-
-            {item.hasSubMenu && item.text === 'User Management' && (
+            {item.hasSubMenu && item.text === 'User Management' && openUserManagement && (
               <Collapse in={openUserManagement} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   {item.subItems.map((subItem) => (
@@ -121,15 +133,11 @@ const DashboardLayout = () => {
                           backgroundColor: 'rgba(0, 102, 255, 0.1)',
                           cursor: 'pointer'
                         },
-                        bgcolor: location.pathname === subItem.path ?
-                          'rgba(0, 102, 255, 0.2)' : 'transparent',
+                        bgcolor: location.pathname === subItem.path ? 'rgba(0, 102, 255, 0.2)' : 'transparent',
                       }}
                     >
                       <ListItemIcon sx={{ color: '#0066FF' }}>{subItem.icon}</ListItemIcon>
-                      <ListItemText
-                        primary={subItem.text}
-                        sx={{ color: '#fff' }}
-                      />
+                      <ListItemText primary={subItem.text} sx={{ color: '#fff' }} />
                     </ListItem>
                   ))}
                 </List>
@@ -212,7 +220,7 @@ const DashboardLayout = () => {
               background: 'rgba(0, 20, 40, 0.7)',
               opacity: 1,
             }}>
-              {fullName}
+              {username}
             </MenuItem>
             <MenuItem
               onClick={handleLogout}

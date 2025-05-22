@@ -16,22 +16,86 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import TasksPage from "./pages/TasksPage";
 import LogViewerSidebar from "./components/LogViewerSidebar";
 import Prometheus from "./pages/tasks/Prometheus";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<DashboardLayout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="roles" element={<RolesPage />} />
-          <Route path="roles/user-roles" element={<UserRolesPage />} />
-          <Route path="files" element={<FilesPage />} />
-          <Route path="tasks" element={<TasksPage />} />
-          <Route path="log-viewer" element={<LogViewerSidebar />} />
-          <Route path="prometheus" element={<Prometheus />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          {/* Admin only routes */}
+          <Route
+            index
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="roles"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <RolesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="roles/user-roles"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <UserRolesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="files"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <FilesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="log-viewer"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <LogViewerSidebar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="prometheus"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <Prometheus />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Routes accessible to all authenticated users */}
+          <Route path="tasks/*" element={<TasksPage />} />
         </Route>
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

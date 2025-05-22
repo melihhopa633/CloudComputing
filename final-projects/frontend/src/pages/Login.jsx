@@ -64,13 +64,14 @@ export default function Login() {
     try {
       const response = await authService.login(email, password);
       if (response.token) {
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("username", response.username);
-        localStorage.setItem("email", response.email);
-        // Eğer backend'de fullname varsa onu da kaydet
-        // localStorage.setItem("fullName", response.fullName || response.username);
+        // Roles are now stored in localStorage by authService
+        // Redirect based on role
+        if (authService.isAdmin()) {
+          navigate("/dashboard"); // Admin sees everything
+        } else {
+          navigate("/tasks"); // Regular users only see tasks
+        }
       }
-      navigate("/dashboard");
     } catch (err) {
       setError("Login failed. Please check your credentials.");
     }
