@@ -575,110 +575,123 @@ const TasksPage = () => {
                   </Box>
                   <Box sx={{ mt: 6 }} />
                   <Grid container spacing={4} alignItems="stretch">
-                     {userTasks
-                        .filter((task) => task.status && !['deleted', 'error'].includes(task.status.toLowerCase()))
-                        .slice()
-                        .sort((a, b) => {
-                           const cmp = (a.serviceType?.toLowerCase() || '').localeCompare(b.serviceType?.toLowerCase() || '');
-                           return sortOrder === 'asc' ? cmp : -cmp;
-                        })
-                        .map((task) => (
-                           <Grid item xs={12} sm={6} md={4} lg={3} key={task.id} sx={{ display: 'flex', height: 1 }}>
-                              <Card sx={{
-                                 height: '100%',
-                                 minHeight: 420,
-                                 maxHeight: 420,
-                                 width: '100%',
-                                 display: 'flex',
-                                 flexDirection: 'column',
-                                 justifyContent: 'space-between',
-                                 background: '#204060',
-                                 color: '#e3f2fd',
-                                 borderRadius: 4,
-                                 boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
-                                 p: 0,
-                                 position: 'relative',
-                                 flex: 1,
-                              }}>
-                                 <CardContent sx={{ flex: 1, p: 3, pb: '16px!important', position: 'relative' }}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                                       <Typography variant="h5" sx={{ fontWeight: 700, color: '#fff', letterSpacing: 0.5 }}>
-                                          {task.serviceType}
-                                       </Typography>
-                                       <Box sx={{ ml: 2 }}>
-                                          <img
-                                             src={LOGO_MAP[task.serviceType?.toLowerCase()] || DEFAULT_LOGO}
-                                             alt={task.serviceType + ' logo'}
-                                             style={{ width: 48, height: 48, borderRadius: 12, background: '#18304a', objectFit: 'contain', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', cursor: 'pointer' }}
-                                             onClick={() => handleLogoClick(task)}
-                                          />
+                     {(() => {
+                        // Sadece benzersiz servis tiplerini göster (çoklamayı engelle)
+                        const uniqueTasks = [];
+                        const seenServiceTypes = new Set();
+                        userTasks
+                           .filter((task) => task.status && !['deleted', 'error'].includes(task.status.toLowerCase()))
+                           .forEach((task) => {
+                              const key = task.serviceType?.toLowerCase();
+                              if (!seenServiceTypes.has(key)) {
+                                 uniqueTasks.push(task);
+                                 seenServiceTypes.add(key);
+                              }
+                           });
+                        return uniqueTasks
+                           .slice()
+                           .sort((a, b) => {
+                              const cmp = (a.serviceType?.toLowerCase() || '').localeCompare(b.serviceType?.toLowerCase() || '');
+                              return sortOrder === 'asc' ? cmp : -cmp;
+                           })
+                           .map((task) => (
+                              <Grid item xs={12} sm={6} md={4} lg={3} key={task.id} sx={{ display: 'flex', height: 1 }}>
+                                 <Card sx={{
+                                    height: '100%',
+                                    minHeight: 420,
+                                    maxHeight: 420,
+                                    width: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
+                                    background: '#204060',
+                                    color: '#e3f2fd',
+                                    borderRadius: 4,
+                                    boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                                    p: 0,
+                                    position: 'relative',
+                                    flex: 1,
+                                 }}>
+                                    <CardContent sx={{ flex: 1, p: 3, pb: '16px!important', position: 'relative' }}>
+                                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                                          <Typography variant="h5" sx={{ fontWeight: 700, color: '#fff', letterSpacing: 0.5 }}>
+                                             {task.serviceType}
+                                          </Typography>
+                                          <Box sx={{ ml: 2 }}>
+                                             <img
+                                                src={LOGO_MAP[task.serviceType?.toLowerCase()] || DEFAULT_LOGO}
+                                                alt={task.serviceType + ' logo'}
+                                                style={{ width: 48, height: 48, borderRadius: 12, background: '#18304a', objectFit: 'contain', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', cursor: 'pointer' }}
+                                                onClick={() => handleLogoClick(task)}
+                                             />
+                                          </Box>
                                        </Box>
-                                    </Box>
-                                    <Chip
-                                       label={task.status}
-                                       sx={{
-                                          background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
-                                          color: '#fff',
-                                          fontWeight: 700,
-                                          fontSize: 18,
-                                          borderRadius: 3,
-                                          px: 2.5,
-                                          py: 0.5,
-                                          mb: 2,
-                                          boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
-                                       }}
-                                    />
-                                    <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500, mt: 1 }}>
-                                       <b>Port:</b> {task.port}
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500 }}>
-                                       <b>Started:</b> {formatDate(task.startTime)}
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 700, mt: 2 }}>
-                                       Events:
-                                    </Typography>
-                                    {task.events && task.events.length > 0 && (
-                                       <Box>
-                                          {task.events.map((event) => (
-                                             <Typography
-                                                key={event.id}
-                                                variant="body2"
-                                                sx={{ color: '#e3f2fd', fontWeight: 400 }}
-                                             >
-                                                {formatDate(event.timestamp)} - {event.type}: {event.details}
-                                             </Typography>
-                                          ))}
-                                       </Box>
-                                    )}
-                                 </CardContent>
-                                 <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
-                                    <Button
-                                       size="large"
-                                       sx={{
-                                          background: '#18304a',
-                                          color: '#e3f2fd',
-                                          fontWeight: 700,
-                                          fontSize: 20,
-                                          borderRadius: 2,
-                                          px: 6,
-                                          py: 1.5,
-                                          boxShadow: '0 2px 8px 0 rgba(0,0,0,0.18), 0 8px 32px 0 rgba(32,64,96,0.18)',
-                                          '&:hover': {
-                                             background: '#2e8b6e',
+                                       <Chip
+                                          label={task.status}
+                                          sx={{
+                                             background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
                                              color: '#fff',
-                                          },
-                                          transition: 'background 0.2s, color 0.2s',
-                                          mt: 2,
-                                          mb: 1,
-                                       }}
-                                       onClick={() => handleStopTask(task.id)}
-                                    >
-                                       STOP
-                                    </Button>
-                                 </CardActions>
-                              </Card>
-                           </Grid>
-                        ))}
+                                             fontWeight: 700,
+                                             fontSize: 18,
+                                             borderRadius: 3,
+                                             px: 2.5,
+                                             py: 0.5,
+                                             mb: 2,
+                                             boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
+                                          }}
+                                       />
+                                       <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500, mt: 1 }}>
+                                          <b>Port:</b> {task.port}
+                                       </Typography>
+                                       <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500 }}>
+                                          <b>Started:</b> {formatDate(task.startTime)}
+                                       </Typography>
+                                       <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 700, mt: 2 }}>
+                                          Events:
+                                       </Typography>
+                                       {task.events && task.events.length > 0 && (
+                                          <Box>
+                                             {task.events.map((event) => (
+                                                <Typography
+                                                   key={event.id}
+                                                   variant="body2"
+                                                   sx={{ color: '#e3f2fd', fontWeight: 400 }}
+                                                >
+                                                   {formatDate(event.timestamp)} - {event.type}: {event.details}
+                                                </Typography>
+                                             ))}
+                                          </Box>
+                                       )}
+                                    </CardContent>
+                                    <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
+                                       <Button
+                                          size="large"
+                                          sx={{
+                                             background: '#18304a',
+                                             color: '#e3f2fd',
+                                             fontWeight: 700,
+                                             fontSize: 20,
+                                             borderRadius: 2,
+                                             px: 6,
+                                             py: 1.5,
+                                             boxShadow: '0 2px 8px 0 rgba(0,0,0,0.18), 0 8px 32px 0 rgba(32,64,96,0.18)',
+                                             '&:hover': {
+                                                background: '#2e8b6e',
+                                                color: '#fff',
+                                             },
+                                             transition: 'background 0.2s, color 0.2s',
+                                             mt: 2,
+                                             mb: 1,
+                                          }}
+                                          onClick={() => handleStopTask(task.id)}
+                                       >
+                                          STOP
+                                       </Button>
+                                    </CardActions>
+                                 </Card>
+                              </Grid>
+                           ))
+                     })()}
                   </Grid>
                </Box>
                {/* Modal: Servis sitesini büyük popup olarak göster */}

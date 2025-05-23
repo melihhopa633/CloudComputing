@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.EntityFrameworkCore;
 
 namespace ResourceManagerService.Features.Task.CreateTask
 {
@@ -22,6 +23,12 @@ namespace ResourceManagerService.Features.Task.CreateTask
 
         public async Task<CreateTaskResponse> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
         {
+            // Aynı kullanıcı için aynı servis tipinde zaten aktif bir task var mı kontrol et
+            var existingTask = await _dbContext.Tasks.FirstOrDefaultAsync(t => t.UserId == request.UserId && t.ServiceType == request.ServiceType && t.Status == "Running", cancellationToken);
+            if (existingTask != null)
+            {
+                throw new InvalidOperationException($"Kullanıcı için bu servis zaten aktif: {request.ServiceType}");
+            }
             try
             {
                 // Docker container başlat (port otomatik bulunacak)
