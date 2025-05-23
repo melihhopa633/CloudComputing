@@ -15,6 +15,7 @@ const authService = {
       localStorage.setItem("username", response.data.username);
       localStorage.setItem("email", response.data.email);
       localStorage.setItem("roles", JSON.stringify(response.data.roles));
+      localStorage.setItem("userId", response.data.userId);
     }
     return response.data;
   },
@@ -28,7 +29,7 @@ const authService = {
 
   isAdmin() {
     const roles = JSON.parse(localStorage.getItem("roles") || "[]");
-    return roles.includes("admin");
+    return roles.includes("Admin");
   },
 
   getRoles() {

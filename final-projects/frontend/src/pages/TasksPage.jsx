@@ -19,7 +19,8 @@ import {
    IconButton,
    Tooltip,
    Dialog,
-   DialogContent
+   DialogContent,
+   Snackbar
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import taskService from '../services/taskService';
@@ -28,6 +29,8 @@ import SortIcon from '@mui/icons-material/Sort';
 import CloseIcon from '@mui/icons-material/Close';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import axios from 'axios';
+import authService from '../services/authService';
+import MuiAlert from '@mui/material/Alert';
 
 // Servis tipine göre logo eşlemesi (sadece bir kere bakılır)
 const LOGO_MAP = {
@@ -48,6 +51,14 @@ const LOGO_MAP = {
 };
 const DEFAULT_LOGO = '/logo192.png';
 
+const SERVICE_LIST = [
+   { key: 'etherpad', name: 'Etherpad', logo: LOGO_MAP.etherpad },
+   { key: 'excalidraw', name: 'Excalidraw', logo: LOGO_MAP.excalidraw },
+   { key: 'filebrowser', name: 'Filebrowser', logo: LOGO_MAP.filebrowser },
+   { key: 'jsoneditor', name: 'JsonEditor', logo: LOGO_MAP.jsoneditor },
+   // Diğer servisleri de ekle
+];
+
 const TasksPage = () => {
    const [selectedTab, setSelectedTab] = useState(0);
    const [tasks, setTasks] = useState([]);
@@ -63,6 +74,15 @@ const TasksPage = () => {
    const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
    const userMenuOpen = Boolean(userMenuAnchorEl);
    const [modalTaskId, setModalTaskId] = useState(null);
+   const [selectedServices, setSelectedServices] = useState([]);
+   const [requesting, setRequesting] = useState(false);
+   const [requestError, setRequestError] = useState("");
+   const [requestSuccess, setRequestSuccess] = useState("");
+   const [userTasks, setUserTasks] = useState([]);
+   const isAdmin = authService.isAdmin();
+   const userEmail = localStorage.getItem('email');
+   const [showSuccess, setShowSuccess] = useState(false);
+   const userId = localStorage.getItem('userId');
 
    useEffect(() => {
       fetchTasks();
@@ -72,15 +92,19 @@ const TasksPage = () => {
       try {
          setLoading(true);
          setError(null);
-         const response = await taskService.getAllTasks();
+         let response;
+         if (isAdmin) {
+            response = await taskService.getAllTasks();
+         } else {
+            response = await taskService.getTasksByUserId(userId);
+         }
          if (response.success) {
-            setTasks(response.data);
+            setUserTasks(response.data);
          } else {
             setError(response.message || 'Failed to fetch tasks');
          }
       } catch (err) {
-         console.error('Error in fetchTasks:', err);
-         setError(err.message || 'Failed to connect to the server. Please check if the backend is running.');
+         setError(err.message || 'Failed to connect to the server.');
       } finally {
          setLoading(false);
       }
@@ -190,6 +214,37 @@ const TasksPage = () => {
       setUserMenuAnchorEl(null);
    };
 
+   const handleServiceToggle = (key) => {
+      setSelectedServices(prev =>
+         prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+      );
+   };
+
+   const handleRequestServices = async () => {
+      setRequesting(true);
+      setRequestError("");
+      setRequestSuccess("");
+      try {
+         for (const serviceType of selectedServices) {
+            await taskService.createTask({ serviceType });
+         }
+         setRequestSuccess("Servis(ler) başarıyla talep edildi!");
+         setShowSuccess(true);
+         setSelectedServices([]);
+         await fetchTasks();
+      } catch (err) {
+         let msg = "Servis talebi başarısız oldu.";
+         if (err?.response?.data?.message) {
+            msg = err.response.data.message;
+         } else if (err?.message) {
+            msg = err.message;
+         }
+         setRequestError(msg);
+      } finally {
+         setRequesting(false);
+      }
+   };
+
    if (loading) {
       return (
          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -211,6 +266,308 @@ const TasksPage = () => {
             >
                Retry
             </Button>
+         </Box>
+      );
+   }
+
+   if (!isAdmin) {
+      // Talep başarılıysa veya kullanıcının aktif servisi varsa, sadece kutuları göster
+      const hasActiveTask = userTasks.filter(task => task.status === 'Running').length > 0;
+      if (showSuccess || hasActiveTask) {
+         return (
+            <Box sx={{ width: '100%', minHeight: '100vh', background: '#0e2235', p: 4 }}>
+               <Snackbar
+                  open={showSuccess}
+                  autoHideDuration={3000}
+                  onClose={() => setShowSuccess(false)}
+                  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+               >
+                  <MuiAlert elevation={6} variant="filled" severity="success" sx={{ fontSize: 18, fontWeight: 700 }}>
+                     {requestSuccess}
+                  </MuiAlert>
+               </Snackbar>
+               <Typography variant="h6" sx={{ color: '#fff', mb: 2, fontWeight: 700 }}>
+                  Aktif Servislerim
+               </Typography>
+               <Grid container spacing={4} alignItems="stretch">
+                  {userTasks.filter(task => task.status === 'Running').map(task => (
+                     <Grid item xs={12} sm={6} md={4} lg={3} key={task.id} sx={{ display: 'flex', height: 1 }}>
+                        <Card sx={{
+                           height: '100%',
+                           minHeight: 420,
+                           maxHeight: 420,
+                           width: '100%',
+                           display: 'flex',
+                           flexDirection: 'column',
+                           justifyContent: 'space-between',
+                           background: '#204060',
+                           color: '#e3f2fd',
+                           borderRadius: 4,
+                           boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                           p: 0,
+                           position: 'relative',
+                           flex: 1,
+                        }}>
+                           <CardContent sx={{ flex: 1, p: 3, pb: '16px!important', position: 'relative' }}>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                                 <Typography variant="h5" sx={{ fontWeight: 700, color: '#fff', letterSpacing: 0.5 }}>
+                                    {task.serviceType}
+                                 </Typography>
+                                 <Box sx={{ ml: 2 }}>
+                                    <img
+                                       src={LOGO_MAP[task.serviceType?.toLowerCase()] || DEFAULT_LOGO}
+                                       alt={task.serviceType + ' logo'}
+                                       style={{ width: 64, height: 64, borderRadius: 12, background: '#18304a', objectFit: 'contain', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', cursor: 'pointer' }}
+                                       onClick={() => handleLogoClick(task)}
+                                    />
+                                 </Box>
+                              </Box>
+                              <Chip
+                                 label={task.status}
+                                 sx={{
+                                    background: '#2e8b6e',
+                                    color: '#fff',
+                                    fontWeight: 700,
+                                    fontSize: 18,
+                                    borderRadius: 3,
+                                    px: 2.5,
+                                    py: 0.5,
+                                    mb: 2,
+                                    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
+                                 }}
+                              />
+                              <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500, mt: 1 }}>
+                                 <b>Port:</b> {task.port}
+                              </Typography>
+                              <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500 }}>
+                                 <b>Started:</b> {formatDate(task.startTime)}
+                              </Typography>
+                              <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 700, mt: 2 }}>
+                                 Events:
+                              </Typography>
+                              {task.events && task.events.length > 0 && (
+                                 <Box>
+                                    {task.events.map((event) => (
+                                       <Typography
+                                          key={event.id}
+                                          variant="body2"
+                                          sx={{ color: '#e3f2fd', fontWeight: 400 }}
+                                       >
+                                          {formatDate(event.timestamp)} - {event.type}: {event.details}
+                                       </Typography>
+                                    ))}
+                                 </Box>
+                              )}
+                           </CardContent>
+                           <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
+                              <Button
+                                 size="large"
+                                 sx={{
+                                    background: '#18304a',
+                                    color: '#e3f2fd',
+                                    fontWeight: 700,
+                                    fontSize: 20,
+                                    borderRadius: 2,
+                                    px: 6,
+                                    py: 1.5,
+                                    boxShadow: '0 2px 8px 0 rgba(0,0,0,0.18), 0 8px 32px 0 rgba(32,64,96,0.18)',
+                                    '&:hover': {
+                                       background: '#2e8b6e',
+                                       color: '#fff',
+                                    },
+                                    transition: 'background 0.2s, color 0.2s',
+                                    mt: 2,
+                                    mb: 1,
+                                 }}
+                                 onClick={() => handleStopTask(task.id)}
+                              >
+                                 STOP
+                              </Button>
+                           </CardActions>
+                        </Card>
+                     </Grid>
+                  ))}
+               </Grid>
+            </Box>
+         );
+      }
+      // Eğer aktif task yoksa, servis talep etme alanı ve kutular birlikte gösterilsin (mevcut haliyle)
+      return (
+         <Box sx={{ width: '100%', minHeight: '100vh', background: '#0e2235', p: 4 }}>
+            <Snackbar
+               open={showSuccess}
+               autoHideDuration={3000}
+               onClose={() => setShowSuccess(false)}
+               anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+               <MuiAlert elevation={6} variant="filled" severity="success" sx={{ fontSize: 18, fontWeight: 700 }}>
+                  {requestSuccess}
+               </MuiAlert>
+            </Snackbar>
+            <Typography variant="h5" sx={{ color: '#fff', mb: 2, fontWeight: 700 }}>
+               Servis Talep Et
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+               {SERVICE_LIST.map(service => (
+                  <Button
+                     key={service.key}
+                     variant={selectedServices.includes(service.key) ? 'contained' : 'outlined'}
+                     onClick={() => handleServiceToggle(service.key)}
+                     sx={{
+                        minWidth: 160,
+                        minHeight: 80,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 3,
+                        borderColor: '#0582CA',
+                        color: '#fff',
+                        background: selectedServices.includes(service.key)
+                           ? 'linear-gradient(90deg, #0582CA, #05CA82)'
+                           : 'rgba(5,130,202,0.18)', // default daha belirgin
+                        boxShadow: selectedServices.includes(service.key)
+                           ? '0 4px 16px 0 rgba(5,130,202,0.18)'
+                           : '0 2px 8px 0 rgba(5,130,202,0.10)',
+                        borderWidth: 2,
+                        fontWeight: 700,
+                        fontSize: 18,
+                        gap: 1,
+                        '&:hover': {
+                           background: 'linear-gradient(90deg, #0582CA, #05CA82)',
+                           color: '#fff',
+                        },
+                     }}
+                  >
+                     <img src={service.logo} alt={service.name} style={{ width: 36, height: 36, marginBottom: 6 }} />
+                     {service.name.toUpperCase()}
+                  </Button>
+               ))}
+            </Box>
+            <Button
+               variant="contained"
+               color="primary"
+               disabled={selectedServices.length === 0 || requesting}
+               onClick={handleRequestServices}
+               sx={{
+                  mt: 2,
+                  fontWeight: 700,
+                  fontSize: 18,
+                  borderRadius: 2,
+                  px: 6,
+                  py: 1.5,
+                  background: selectedServices.length === 0 ? '#0582CA' : 'linear-gradient(90deg, #0582CA, #05CA82)',
+                  color: '#fff',
+                  opacity: 1,
+                  boxShadow: '0 2px 8px 0 rgba(5,130,202,0.18)',
+               }}
+            >
+               TALEP ET
+            </Button>
+            {requestError && <Alert severity="error" sx={{ mt: 2 }}>{requestError}</Alert>}
+            <Box sx={{ mt: 6 }} />
+            <Typography variant="h6" sx={{ color: '#fff', mb: 2, fontWeight: 700 }}>
+               Aktif Servislerim
+            </Typography>
+            <Grid container spacing={4} alignItems="stretch">
+               {userTasks.filter(task => task.status === 'Running').map(task => (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={task.id} sx={{ display: 'flex', height: 1 }}>
+                     <Card sx={{
+                        height: '100%',
+                        minHeight: 420,
+                        maxHeight: 420,
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        background: '#204060',
+                        color: '#e3f2fd',
+                        borderRadius: 4,
+                        boxShadow: '0 4px 24px 0 rgba(0,0,0,0.18)',
+                        p: 0,
+                        position: 'relative',
+                        flex: 1,
+                     }}>
+                        <CardContent sx={{ flex: 1, p: 3, pb: '16px!important', position: 'relative' }}>
+                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                              <Typography variant="h5" sx={{ fontWeight: 700, color: '#fff', letterSpacing: 0.5 }}>
+                                 {task.serviceType}
+                              </Typography>
+                              <Box sx={{ ml: 2 }}>
+                                 <img
+                                    src={LOGO_MAP[task.serviceType?.toLowerCase()] || DEFAULT_LOGO}
+                                    alt={task.serviceType + ' logo'}
+                                    style={{ width: 64, height: 64, borderRadius: 12, background: '#18304a', objectFit: 'contain', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', cursor: 'pointer' }}
+                                    onClick={() => handleLogoClick(task)}
+                                 />
+                              </Box>
+                           </Box>
+                           <Chip
+                              label={task.status}
+                              sx={{
+                                 background: '#2e8b6e',
+                                 color: '#fff',
+                                 fontWeight: 700,
+                                 fontSize: 18,
+                                 borderRadius: 3,
+                                 px: 2.5,
+                                 py: 0.5,
+                                 mb: 2,
+                                 boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
+                              }}
+                           />
+                           <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500, mt: 1 }}>
+                              <b>Port:</b> {task.port}
+                           </Typography>
+                           <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500 }}>
+                              <b>Started:</b> {formatDate(task.startTime)}
+                           </Typography>
+                           <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 700, mt: 2 }}>
+                              Events:
+                           </Typography>
+                           {task.events && task.events.length > 0 && (
+                              <Box>
+                                 {task.events.map((event) => (
+                                    <Typography
+                                       key={event.id}
+                                       variant="body2"
+                                       sx={{ color: '#e3f2fd', fontWeight: 400 }}
+                                    >
+                                       {formatDate(event.timestamp)} - {event.type}: {event.details}
+                                    </Typography>
+                                 ))}
+                              </Box>
+                           )}
+                        </CardContent>
+                        <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
+                           <Button
+                              size="large"
+                              sx={{
+                                 background: '#18304a',
+                                 color: '#e3f2fd',
+                                 fontWeight: 700,
+                                 fontSize: 20,
+                                 borderRadius: 2,
+                                 px: 6,
+                                 py: 1.5,
+                                 boxShadow: '0 2px 8px 0 rgba(0,0,0,0.18), 0 8px 32px 0 rgba(32,64,96,0.18)',
+                                 '&:hover': {
+                                    background: '#2e8b6e',
+                                    color: '#fff',
+                                 },
+                                 transition: 'background 0.2s, color 0.2s',
+                                 mt: 2,
+                                 mb: 1,
+                              }}
+                              onClick={() => handleStopTask(task.id)}
+                           >
+                              STOP
+                           </Button>
+                        </CardActions>
+                     </Card>
+                  </Grid>
+               ))}
+            </Grid>
          </Box>
       );
    }
@@ -266,9 +623,9 @@ const TasksPage = () => {
             </Box>
             <Box sx={{ mt: 6 }} />
             <Grid container spacing={4} alignItems="stretch">
-               {tasks
+               {userTasks
                   .filter((task) => task.status === 'Running')
-                  .slice() // orijinal diziyi bozmamak için kopya al
+                  .slice()
                   .sort((a, b) => {
                      const cmp = (a.serviceType?.toLowerCase() || '').localeCompare(b.serviceType?.toLowerCase() || '');
                      return sortOrder === 'asc' ? cmp : -cmp;

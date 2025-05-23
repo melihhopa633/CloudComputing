@@ -46,7 +46,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
             RefreshToken = refreshToken,
             Username = user.Username,
             Email = user.Email,
-            Roles = user.UserRoles.Select(ur => ur.Role.RoleName)
+            Roles = user.UserRoles.Select(ur => ur.Role.RoleName),
+            UserId = user.Id
         };
     }
 } 

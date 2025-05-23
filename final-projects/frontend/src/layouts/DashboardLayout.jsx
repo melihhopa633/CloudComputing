@@ -42,7 +42,6 @@ const DashboardLayout = () => {
   };
 
   const menuItems = [
-    // Admin only menu items
     ...(isAdmin ? [
       { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
       {
@@ -55,12 +54,12 @@ const DashboardLayout = () => {
           { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
         ]
       },
-      { text: 'Files', icon: <FileIcon />, path: '/files' },
+      { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
       { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
       { text: 'Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
-    ] : []),
-    // Menu items for all users
-    { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' }
+    ] : [
+      { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' }
+    ]),
   ];
 
   const handleMenuItemClick = (item) => {
