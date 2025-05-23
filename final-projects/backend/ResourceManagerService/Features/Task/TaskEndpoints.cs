@@ -9,6 +9,7 @@ using ResourceManagerService.Features.Task.GetAllTask;
 using ResourceManagerService.Features.Task.GetAllTaskByUserId;
 using ResourceManagerService.Features.Task.GetTask;
 using ResourceManagerService.Features.Task.ReportMetrics;
+using ResourceManagerService.Services;
 
 namespace ResourceManagerService.Features.Task
 {
@@ -68,6 +69,28 @@ namespace ResourceManagerService.Features.Task
                 return result
                     ? Results.Ok(ApiResponse.SuccessResponse("Task metrics reported to blockchain"))
                     : Results.NotFound(ApiResponse.Fail("Task not found"));
+            });
+
+            app.MapDelete("/api/tasks/all", async (ISender sender) =>
+            {
+                var result = await sender.Send(new DeleteTask.DeleteAllTasksCommand());
+                return result
+                    ? Results.Ok(ApiResponse.SuccessResponse("All tasks deleted"))
+                    : Results.Problem("Failed to delete all tasks");
+            });
+
+            app.MapDelete("/api/tasks/service/{serviceType}", async (string serviceType, ISender sender) =>
+            {
+                var result = await sender.Send(new DeleteTask.DeleteTasksByServiceTypeCommand(serviceType));
+                return result
+                    ? Results.Ok(ApiResponse.SuccessResponse($"All tasks for service {serviceType} deleted"))
+                    : Results.Problem($"Failed to delete tasks for service {serviceType}");
+            });
+
+            app.MapGet("/api/services", (DockerService dockerService) =>
+            {
+                var services = DockerService.GetAllServiceInfos();
+                return Results.Ok(ApiResponse.SuccessResponse("Service list", services));
             });
         }
     }

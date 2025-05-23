@@ -264,5 +264,14 @@ private static readonly Dictionary<string, DockerServiceConfig> ServiceMap = new
                 throw new Exception($"❌ Failed to pull image '{imageName}':\n{error}");
             }
         }
+
+        public static List<object> GetAllServiceInfos()
+        {
+            return ServiceMap.Select(kv => new {
+                key = kv.Key,
+                image = kv.Value.Image,
+                port = kv.Value.ContainerPort
+            }).ToList<object>();
+        }
     }
 }

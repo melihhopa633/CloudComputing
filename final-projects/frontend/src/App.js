@@ -38,7 +38,7 @@ function App() {
           <Route
             index
             element={
-              <ProtectedRoute requireAdmin={true}>
+              <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
             }

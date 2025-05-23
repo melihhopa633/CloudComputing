@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace ResourceManagerService.Features.Task.DeleteTask
 {
@@ -175,6 +176,47 @@ namespace ResourceManagerService.Features.Task.DeleteTask
                 cpuUsageOut = rnd.Next(1, 11).ToString();
             }
             return (memoryMB, cpuUsageOut);
+        }
+    }
+
+    public class DeleteAllTasksHandler : IRequestHandler<DeleteAllTasksCommand, bool>
+    {
+        private readonly AppDbContext _db;
+        public DeleteAllTasksHandler(AppDbContext db)
+        {
+            _db = db;
+        }
+        public async Task<bool> Handle(DeleteAllTasksCommand request, CancellationToken cancellationToken)
+        {
+            var allTasks = _db.Tasks.ToList();
+            _db.Tasks.RemoveRange(allTasks);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+    }
+
+    public class DeleteTasksByServiceTypeCommand : IRequest<bool>
+    {
+        public string ServiceType { get; set; }
+        public DeleteTasksByServiceTypeCommand(string serviceType)
+        {
+            ServiceType = serviceType;
+        }
+    }
+
+    public class DeleteTasksByServiceTypeHandler : IRequestHandler<DeleteTasksByServiceTypeCommand, bool>
+    {
+        private readonly AppDbContext _db;
+        public DeleteTasksByServiceTypeHandler(AppDbContext db)
+        {
+            _db = db;
+        }
+        public async Task<bool> Handle(DeleteTasksByServiceTypeCommand request, CancellationToken cancellationToken)
+        {
+            var tasks = _db.Tasks.Where(t => t.ServiceType.ToLower() == request.ServiceType.ToLower()).ToList();
+            _db.Tasks.RemoveRange(tasks);
+            await _db.SaveChangesAsync(cancellationToken);
+            return true;
         }
     }
 } 

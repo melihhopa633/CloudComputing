@@ -58,6 +58,7 @@ const DashboardLayout = () => {
       { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
       { text: 'Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
     ] : [
+      { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
       { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' }
     ]),
   ];
