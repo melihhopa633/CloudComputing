@@ -576,11 +576,11 @@ const TasksPage = () => {
                   <Box sx={{ mt: 6 }} />
                   <Grid container spacing={4} alignItems="stretch">
                      {(() => {
-                        // Sadece benzersiz servis tiplerini göster (çoklamayı engelle)
+                        // Sadece benzersiz servis tiplerini göster (çoklamayı engelle) ve sadece Running durumundakileri filtrele
                         const uniqueTasks = [];
                         const seenServiceTypes = new Set();
                         userTasks
-                           .filter((task) => task.status && !['deleted', 'error'].includes(task.status.toLowerCase()))
+                           .filter((task) => task.status === 'Running')  // Sadece Running durumundakileri al
                            .forEach((task) => {
                               const key = task.serviceType?.toLowerCase();
                               if (!seenServiceTypes.has(key)) {
