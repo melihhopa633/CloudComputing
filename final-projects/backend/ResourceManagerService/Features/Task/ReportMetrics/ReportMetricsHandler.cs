@@ -16,7 +16,7 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
         private readonly MetricsService _metricsService;
         private readonly UserInfoService _userInfoService;
         private readonly HttpClient _httpClient;
-        private readonly string _blockchainServiceBaseUrl = "http://localhost:4002";
+        private readonly string _blockchainServiceBaseUrl = "http://blockchainservice:4002";
         public ReportMetricsHandler(AppDbContext dbContext, MetricsService metricsService, UserInfoService userInfoService, HttpClient httpClient)
         {
             _dbContext = dbContext;
@@ -38,9 +38,9 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
                 if (!string.IsNullOrWhiteSpace(task.ContainerId))
                 {
                     memoryUsage = await _metricsService.GetContainerMemoryUsageAsync(task.ContainerId);
-                    if (memoryUsage.Contains('.'))
-                        memoryUsage = memoryUsage.Substring(0, memoryUsage.IndexOf('.'));
                     cpuUsage = await _metricsService.GetContainerCpuUsageAsync(task.ContainerId);
+                    
+                    Console.WriteLine($"[ReportMetricsHandler] Container {task.ContainerId}: Memory={memoryUsage}MB, CPU={cpuUsage}");
                 }
             }
             catch (Exception ex)
@@ -50,12 +50,10 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
                 cpuUsage = "-1";
             }
 
-            // RAM'i MB'a çevir
-            string memoryMB = "-1";
-            if (double.TryParse(memoryUsage, out double memBytes) && memBytes >= 0)
-            {
-                memoryMB = (memBytes / (1024 * 1024)).ToString("F2");
-            }
+            // MetricsService zaten MB ve decimal format döndürüyor, ekstra dönüştürme yapmaya gerek yok
+            string memoryMB = memoryUsage;
+            
+            // CPU usage zaten decimal format (0.1234 gibi)
 
             // Kullanıcı bilgisi çek
             string userEmail = string.Empty;
@@ -73,29 +71,7 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
                 userFullName = "unknown";
             }
 
-            // Blockchain backend'e veri gönder
-            try
-            {
-                var metricObj = new
-                {
-                    user_email = userEmail,
-                    user_fullname = userFullName,
-                    containerId = task.ContainerId,
-                    containerName = task.ServiceType,
-                    memoryMB = memoryMB,
-                    cpuUsage = cpuUsage
-                };
-                var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(metricObj), System.Text.Encoding.UTF8, "application/json");
-                var resp = await _httpClient.PostAsync($"{_blockchainServiceBaseUrl}/api/metrics", content);
-                resp.EnsureSuccessStatusCode();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[ReportMetricsHandler] Blockchain metrics post error for TaskId {TaskId}", task.Id);
-                // Blockchain'e yazılamadı, logla ama işlemi bozma
-            }
-
-            // Metrics'i kendi veritabanına kaydet
+            // Metrics'i kendi veritabanına hemen kaydet
             try
             {
                 var metrics = new Metrics
@@ -110,12 +86,47 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
                 };
                 _dbContext.Metrics.Add(metrics);
                 await _dbContext.SaveChangesAsync(cancellationToken);
+                
+                Console.WriteLine($"[ReportMetricsHandler] Metrics saved to local DB for TaskId {task.Id}");
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[ReportMetricsHandler] Metrics DB insert error for TaskId {TaskId}", task.Id);
             }
 
+            // Blockchain işlemini asenkron başlat (response'u bekletmez)
+            _ = System.Threading.Tasks.Task.Run(async () =>
+            {
+                try
+                {
+                    Console.WriteLine($"[ReportMetricsHandler] Starting async blockchain operation for TaskId {task.Id}");
+                    
+                    var metricObj = new
+                    {
+                        user_email = userEmail,
+                        user_fullname = userFullName,
+                        containerId = task.ContainerId,
+                        containerName = task.ServiceType,
+                        memoryMB = memoryMB,
+                        cpuUsage = cpuUsage
+                    };
+                    
+                    // Yeni HttpClient oluştur (dispose edilmiş olanı kullanma)
+                    using var httpClient = new HttpClient();
+                    var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(metricObj), System.Text.Encoding.UTF8, "application/json");
+                    var resp = await httpClient.PostAsync($"{_blockchainServiceBaseUrl}/api/metrics", content);
+                    resp.EnsureSuccessStatusCode();
+                    
+                    Console.WriteLine($"[ReportMetricsHandler] Blockchain operation completed for TaskId {task.Id}");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "[ReportMetricsHandler] Async blockchain metrics post error for TaskId {TaskId}", task.Id);
+                }
+            });
+
+            // Hemen true döndür (modal kapanabilir)
+            Console.WriteLine($"[ReportMetricsHandler] Returning success immediately for TaskId {task.Id}");
             return true;
         }
     }

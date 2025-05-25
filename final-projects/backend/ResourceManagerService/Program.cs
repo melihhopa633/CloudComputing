@@ -16,9 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Serilog konfigürasyonu
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.Seq("http://localhost:5341")
     .CreateLogger();
 builder.Host.UseSerilog();
 
@@ -44,7 +41,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<UserInfoService>(sp =>
 {
     var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
-    var identityServiceBaseUrl = "http://localhost:5001"; // Gerekirse appsettings.json'dan alınabilir
+    var identityServiceBaseUrl = "http://identityservice:8080"; // Container adı ve port
     return new UserInfoService(httpClient, identityServiceBaseUrl);
 });
 

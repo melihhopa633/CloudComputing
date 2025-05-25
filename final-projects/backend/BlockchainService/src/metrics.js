@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("./database");
+const blockchain = require("./blockchain");
 
 // Blockchain işlem detaylarını loglamak için yardımcı fonksiyon
 const logBlockchainInteraction = (action, details) => {
@@ -24,8 +25,14 @@ function setupApiRoutes(app, contract) {
   // POST /api/metrics - Yeni metrik ekle
   router.post("/metrics", async (req, res) => {
     try {
-      const { user_email, containerId, containerName, memoryMB, cpuUsage } =
-        req.body;
+      const {
+        user_email,
+        user_fullname,
+        containerId,
+        containerName,
+        memoryMB,
+        cpuUsage,
+      } = req.body;
       console.log("Received metric:", req.body);
 
       // Validate required fields
@@ -37,18 +44,44 @@ function setupApiRoutes(app, contract) {
         });
       }
 
-      // Add metric to database
-      const metricId = await db.addMetric({
+      // Blockchain transaction simüle et
+      const blockchainResult = await blockchain.recordMetric({
         userEmail: user_email,
+        userFullname: user_fullname,
         containerId,
         containerName: containerName || containerId,
         memoryMB: parseFloat(memoryMB),
         cpuUsage: parseFloat(cpuUsage),
       });
 
+      logBlockchainInteraction("Metric Transaction", {
+        txHash: blockchainResult.txHash,
+        blockNumber: blockchainResult.blockNumber,
+        status: blockchainResult.status,
+        gasUsed: blockchainResult.gasUsed,
+      });
+
+      // Add metric to database with blockchain data
+      const metricId = await db.addMetric({
+        userEmail: user_email,
+        userFullname: user_fullname,
+        containerId,
+        containerName: containerName || containerId,
+        memoryMB: parseFloat(memoryMB),
+        cpuUsage: parseFloat(cpuUsage),
+        txHash: blockchainResult.txHash,
+        blockNumber: blockchainResult.blockNumber,
+      });
+
       res.status(201).json({
         id: metricId,
         message: "Metric added successfully",
+        blockchain: {
+          txHash: blockchainResult.txHash,
+          blockNumber: blockchainResult.blockNumber,
+          status: blockchainResult.status,
+          gasUsed: blockchainResult.gasUsed,
+        },
       });
     } catch (error) {
       console.error("Error adding metric:", error);
@@ -142,6 +175,7 @@ function setupApiRoutes(app, contract) {
         txHash: m.tx_hash,
         blockNumber: m.block_number,
         userEmail: m.user_email,
+        userFullname: m.user_fullname,
       }));
 
       res.json({
@@ -197,6 +231,7 @@ function setupApiRoutes(app, contract) {
         txHash: m.tx_hash,
         blockNumber: m.block_number,
         userEmail: m.user_email,
+        userFullname: m.user_fullname,
       }));
 
       return res.json({
@@ -348,6 +383,7 @@ function setupApiRoutes(app, contract) {
         txHash: m.tx_hash,
         blockNumber: m.block_number,
         userEmail: m.user_email,
+        userFullname: m.user_fullname,
       }));
 
       res.json(metrics);
@@ -473,6 +509,49 @@ function setupApiRoutes(app, contract) {
       console.error("Batch processing error:", error);
       res.status(500).json({
         error: "Failed to process batch metrics",
+        message: error.message,
+      });
+    }
+  });
+
+  // GET /api/blockchain/stats - Blockchain istatistikleri
+  router.get("/blockchain/stats", async (req, res) => {
+    try {
+      const stats = blockchain.getStats();
+      res.json({
+        success: true,
+        data: stats,
+      });
+    } catch (error) {
+      console.error("Error getting blockchain stats:", error);
+      res.status(500).json({
+        error: "Failed to get blockchain stats",
+        message: error.message,
+      });
+    }
+  });
+
+  // GET /api/blockchain/transaction/:txHash - Transaction durumu
+  router.get("/blockchain/transaction/:txHash", async (req, res) => {
+    try {
+      const txHash = req.params.txHash;
+      const status = blockchain.getTransactionStatus(txHash);
+
+      if (status) {
+        res.json({
+          success: true,
+          data: status,
+        });
+      } else {
+        res.status(404).json({
+          error: "Transaction not found",
+          message: `Transaction ${txHash} not found`,
+        });
+      }
+    } catch (error) {
+      console.error("Error getting transaction status:", error);
+      res.status(500).json({
+        error: "Failed to get transaction status",
         message: error.message,
       });
     }

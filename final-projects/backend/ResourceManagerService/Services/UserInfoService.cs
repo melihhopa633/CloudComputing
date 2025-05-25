@@ -23,7 +23,7 @@ namespace ResourceManagerService.Services
             var json = JObject.Parse(response);
             var user = json["data"];
             string email = user["email"]?.ToString() ?? string.Empty;
-            string fullname = user["fullName"]?.ToString() ?? string.Empty;
+            string fullname = user["username"]?.ToString() ?? user["email"]?.ToString() ?? "Unknown User";
             return (email, fullname);
         }
     }

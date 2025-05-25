@@ -227,16 +227,19 @@ const TasksPage = () => {
       setModalOpen(true);
    };
    const handleModalClose = async () => {
-      // Metrics kaydını tetikle
+      // Metrics kaydını tetikle (asenkron - modal'ı bekletmez)
       if (modalTaskId) {
-         try {
-            await axios.post(`http://localhost:5002/api/report-metrics/${modalTaskId}`);
-            // İsterseniz burada bir toast veya alert gösterebilirsiniz
-            // alert('Task metrics reported!');
-         } catch (err) {
-            // alert('Failed to report metrics');
-         }
+         // Asenkron olarak gönder, modal'ı bekletme
+         axios.post(`http://localhost:5002/api/report-metrics/${modalTaskId}`)
+            .then(() => {
+               console.log('Metrics reported successfully');
+            })
+            .catch((err) => {
+               console.error('Failed to report metrics:', err);
+            });
       }
+      
+      // Modal'ı hemen kapat
       setModalOpen(false);
       setModalUrl('');
       setModalTitle('');

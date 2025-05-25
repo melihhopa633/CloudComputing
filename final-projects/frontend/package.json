@@ -19,9 +19,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start-fast": "FAST_REFRESH=false react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "stop": "pkill -f react-scripts || taskkill /f /im node.exe"
   },
   "browserslist": {
     "production": [

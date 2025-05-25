@@ -21,6 +21,7 @@ services:
       seq:
         condition: service_started
     restart: unless-stopped
+    stop_grace_period: 10s
     networks:
       - app-network
     healthcheck:
@@ -53,6 +54,7 @@ services:
       docker_stats_exporter: 
         condition: service_started
     restart: unless-stopped
+    stop_grace_period: 10s
     networks:
       - app-network
     healthcheck:
@@ -190,6 +192,7 @@ services:
       postgres_blockchain:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: 10s
     networks:
       - app-network
 

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics;
 
 namespace ResourceManagerService.Services
 {
@@ -28,12 +29,44 @@ namespace ResourceManagerService.Services
 
         public async Task<string> GetContainerMemoryUsageAsync(string containerId)
         {
-            try {
-                // RAM kullanım ortalaması (1 günlük)
-                string query = $"avg_over_time(dockerstats_memory_usage_bytes{{id=\"{containerId}\"}}[1d])";
-                return await QueryPrometheusForValueAsync(query);
+            try 
+            {
+                // Docker stats komutunu kullanarak gerçek zamanlı memory kullanımını al
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "docker",
+                    Arguments = $"stats {containerId} --no-stream --format \"{{{{.MemUsage}}}}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null) return "0";
+
+                string output = await process.StandardOutput.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    Console.WriteLine($"Docker stats failed for container {containerId}");
+                    return "0";
+                }
+
+                // Output format: "123.4MiB / 2GiB" - sadece kullanılan kısmı al
+                var parts = output.Trim().Split('/');
+                if (parts.Length > 0)
+                {
+                    var memUsage = parts[0].Trim();
+                    // MiB veya GiB'i MB'a çevir
+                    return ConvertToMB(memUsage);
+                }
+
+                return "0";
             }
-            catch (Exception ex) {
+            catch (Exception ex) 
+            {
                 Console.WriteLine($"Error getting memory metrics: {ex.Message}");
                 return "0";
             }
@@ -41,15 +74,126 @@ namespace ResourceManagerService.Services
 
         public async Task<string> GetContainerCpuUsageAsync(string containerId)
         {
-            try {
-                // CPU kullanım oranı ortalaması (1 günlük)
-                string query = $"avg_over_time(dockerstats_cpu_usage_ratio{{id=\"{containerId}\"}}[1d])";
-                return await QueryPrometheusForValueAsync(query);
+            try 
+            {
+                // Daha hassas CPU ölçümü için farklı format deneyelim
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "docker",
+                    Arguments = $"stats {containerId} --no-stream --format \"table {{{{.CPUPerc}}}}\\t{{{{.MemUsage}}}}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                if (process == null) 
+                {
+                    Console.WriteLine($"[MetricsService] Failed to start docker process for {containerId}");
+                    return "0";
+                }
+
+                string output = await process.StandardOutput.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                if (process.ExitCode != 0)
+                {
+                    Console.WriteLine($"Docker stats failed for container {containerId}");
+                    return "0";
+                }
+
+                Console.WriteLine($"[MetricsService] Raw Docker stats output: {output}");
+
+                // Output'u parse et
+                var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                if (lines.Length >= 2) // Header + data
+                {
+                    var dataLine = lines[1].Trim();
+                    // Tab veya space ile split yap
+                    var parts = dataLine.Split(new char[] { '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 1)
+                    {
+                        var cpuUsage = parts[0].Trim().Replace("%", "");
+                        
+                        if (double.TryParse(cpuUsage, out double cpuPercent))
+                        {
+                            Console.WriteLine($"[MetricsService] Parsed CPU: {cpuPercent}% for container {containerId}");
+                            
+                            // Gerçek değeri döndür, minimum değer verme
+                            var result = (cpuPercent / 100.0).ToString("F4");
+                            Console.WriteLine($"[MetricsService] Final CPU value: {result}");
+                            return result;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[MetricsService] Could not parse CPU value: '{cpuUsage}' for container {containerId}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[MetricsService] Not enough parts in data line: '{dataLine}' for container {containerId}");
+                    }
+                }
+
+                Console.WriteLine($"[MetricsService] Could not parse CPU data for {containerId}");
+                return "0";
             }
-            catch (Exception ex) {
+            catch (Exception ex) 
+            {
                 Console.WriteLine($"Error getting CPU metrics: {ex.Message}");
                 return "0";
             }
+        }
+
+        private string ConvertToMB(string memoryString)
+        {
+            try
+            {
+                // "123.4MiB" veya "1.2GiB" formatını MB'a çevir
+                var numericPart = "";
+                var unit = "";
+                
+                for (int i = 0; i < memoryString.Length; i++)
+                {
+                    if (char.IsDigit(memoryString[i]) || memoryString[i] == '.')
+                    {
+                        numericPart += memoryString[i];
+                    }
+                    else
+                    {
+                        unit = memoryString.Substring(i);
+                        break;
+                    }
+                }
+
+                if (double.TryParse(numericPart, out double value))
+                {
+                    switch (unit.ToUpper())
+                    {
+                        case "MIB":
+                            return (value * 1.048576).ToString("F2"); // MiB to MB
+                        case "GIB":
+                            return (value * 1073.741824).ToString("F2"); // GiB to MB
+                        case "KIB":
+                            return (value * 0.001048576).ToString("F2"); // KiB to MB
+                        case "MB":
+                            return value.ToString("F2");
+                        case "GB":
+                            return (value * 1000).ToString("F2");
+                        case "KB":
+                            return (value * 0.001).ToString("F2");
+                        default:
+                            return value.ToString("F2"); // Assume MB
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error converting memory string '{memoryString}': {ex.Message}");
+            }
+            
+            return "0";
         }
 
         private async Task<string> QueryPrometheusForValueAsync(string query)

@@ -97,6 +97,7 @@ async function initializeDatabase() {
       CREATE TABLE metrics (
         id SERIAL PRIMARY KEY,
         user_email VARCHAR(255) NOT NULL,
+        user_fullname VARCHAR(255),
         container_id VARCHAR(255) NOT NULL,
         container_name VARCHAR(255) NOT NULL,
         memory_mb DECIMAL(10,2) NOT NULL,
@@ -111,6 +112,7 @@ async function initializeDatabase() {
       CREATE INDEX idx_metrics_container_id ON metrics (container_id);
       CREATE INDEX idx_metrics_container_name ON metrics (container_name);
       CREATE INDEX idx_metrics_user_email ON metrics (user_email);
+      CREATE INDEX idx_metrics_user_fullname ON metrics (user_fullname);
     `);
     console.log("Created new metrics table with user_email column");
 
@@ -136,6 +138,7 @@ async function query(sql, params = []) {
 
 async function addMetric({
   userEmail,
+  userFullname,
   containerId,
   containerName,
   memoryMB,
@@ -147,11 +150,12 @@ async function addMetric({
     const dbQuery = query;
     const result = await dbQuery(
       `INSERT INTO metrics 
-       (user_email, container_id, container_name, memory_mb, cpu_usage, tx_hash, block_number) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       (user_email, user_fullname, container_id, container_name, memory_mb, cpu_usage, tx_hash, block_number) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING id`,
       [
         userEmail,
+        userFullname,
         containerId,
         containerName,
         memoryMB,
@@ -174,6 +178,7 @@ async function addMetricsBatch(metrics) {
   try {
     const values = metrics.map((m) => [
       m.userEmail || "system@example.com", // Add default user_email
+      m.userFullname || "System User", // Add default user_fullname
       m.containerId,
       m.containerName,
       m.memoryMB,
@@ -188,8 +193,8 @@ async function addMetricsBatch(metrics) {
       for (const data of values) {
         await client.query(
           `INSERT INTO metrics 
-           (user_email, container_id, container_name, memory_mb, cpu_usage, tx_hash, block_number) 
-           VALUES ($1, $2, $3, $4, $5, $6, $7) 
+           (user_email, user_fullname, container_id, container_name, memory_mb, cpu_usage, tx_hash, block_number) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
            ON CONFLICT (container_id, created_at) DO NOTHING`,
           data
         );
@@ -238,6 +243,7 @@ async function getAllMetrics(options = {}) {
       "tx_hash",
       "block_number",
       "user_email",
+      "user_fullname",
     ];
     if (!validColumns.includes(sortBy)) {
       throw new Error("Invalid sort column");
