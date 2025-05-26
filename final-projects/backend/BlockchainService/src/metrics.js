@@ -140,7 +140,7 @@ function setupApiRoutes(app, contract) {
   });
 
   // GET /api/metrics - Get all metrics with pagination and filtering
-  router.get("/metrics", requireUserEmail, async (req, res) => {
+  router.get("/metrics", async (req, res) => {
     const {
       limit = 10,
       offset = 0,
@@ -149,7 +149,12 @@ function setupApiRoutes(app, contract) {
       fromTimestamp,
       toTimestamp,
       containerId,
+      all,
     } = req.query;
+
+    // Eğer all=true ise userEmail filtresi gönderme
+    const userEmail =
+      all === "true" ? undefined : req.query.user_email || req.body?.user_email;
 
     try {
       const dbResult = await db.getAllMetrics({
@@ -158,15 +163,14 @@ function setupApiRoutes(app, contract) {
         sortBy,
         sortOrder,
         fromTimestamp: fromTimestamp ? parseInt(fromTimestamp) : undefined,
-        toTimestamp: toTimestamp
-          ? parseInt(toTimestamp)
-          : Math.floor(Date.now() / 1000),
-        userEmail: req.userEmail,
+        toTimestamp: toTimestamp ? parseInt(toTimestamp) : undefined,
+        userEmail,
         containerId,
       });
 
       // Transform database metrics
       const metrics = dbResult.metrics.map((m) => ({
+        id: m.id,
         containerId: m.container_id,
         containerName: m.container_name,
         memoryMB: m.memory_mb,
@@ -223,6 +227,7 @@ function setupApiRoutes(app, contract) {
 
       // Transform database metrics
       const metrics = dbResult.metrics.map((m) => ({
+        id: m.id,
         containerId: m.container_id,
         containerName: m.container_name,
         memoryMB: m.memory_mb,

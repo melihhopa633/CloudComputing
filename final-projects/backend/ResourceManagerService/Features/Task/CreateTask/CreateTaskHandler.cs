@@ -15,10 +15,12 @@ namespace ResourceManagerService.Features.Task.CreateTask
     {
         private readonly AppDbContext _dbContext;
         private readonly DockerService _dockerService;
-        public CreateTaskHandler(AppDbContext dbContext, DockerService dockerService)
+        private readonly UserInfoService _userInfoService;
+        public CreateTaskHandler(AppDbContext dbContext, DockerService dockerService, UserInfoService userInfoService)
         {
             _dbContext = dbContext;
             _dockerService = dockerService;
+            _userInfoService = userInfoService;
         }
 
         public async Task<CreateTaskResponse> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
@@ -31,13 +33,32 @@ namespace ResourceManagerService.Features.Task.CreateTask
             }
             try
             {
+                // Kullanıcı bilgisini çek
+                string userFullName = "Unknown User";
+                try
+                {
+                    Console.WriteLine($"[CreateTaskHandler] Fetching user info for UserId: {request.UserId}");
+                    var userInfo = await _userInfoService.GetUserInfoAsync(request.UserId);
+                    Console.WriteLine($"[CreateTaskHandler] User info received - Email: {userInfo.Email}, FullName: {userInfo.FullName}");
+                    userFullName = userInfo.FullName;
+                    Console.WriteLine($"[CreateTaskHandler] UserFullName set to: {userFullName}");
+                }
+                catch (Exception ex)
+                {
+                    userFullName = $"ERROR: {ex.Message}";
+                    Console.WriteLine($"[CreateTaskHandler] User info fetch error for UserId {request.UserId}: {ex.Message}");
+                    Console.WriteLine($"[CreateTaskHandler] Exception details: {ex}");
+                }
+
                 // Docker container başlat (port otomatik bulunacak)
                 var (containerId, port) = await _dockerService.StartContainerAsync(request.ServiceType);
 
+                Console.WriteLine($"[CreateTaskHandler] Creating task with UserFullName: '{userFullName}'");
                 var task = new Entities.Task
                 {
                     Id = Guid.NewGuid(),
                     UserId = request.UserId,
+                    UserFullName = userFullName,
                     ServiceType = request.ServiceType,
                     ContainerId = containerId,
                     Port = port,
@@ -54,6 +75,7 @@ namespace ResourceManagerService.Features.Task.CreateTask
                 };
                 _dbContext.Tasks.Add(task);
                 await _dbContext.SaveChangesAsync(cancellationToken);
+                Console.WriteLine($"[CreateTaskHandler] Task saved to database with UserFullName: '{task.UserFullName}'");
                 return new CreateTaskResponse()
                 {
                     Id = task.Id,
@@ -68,11 +90,24 @@ namespace ResourceManagerService.Features.Task.CreateTask
                 if (ex.Message.Contains("docker") || ex is FileNotFoundException || ex.InnerException is FileNotFoundException)
                 {
                     Console.WriteLine($"Docker hatası: {ex.Message}");
+                    // Kullanıcı bilgisini çek (hata durumu için)
+                    string errorUserFullName = "Unknown User";
+                    try
+                    {
+                        var userInfo = await _userInfoService.GetUserInfoAsync(request.UserId);
+                        errorUserFullName = userInfo.FullName;
+                    }
+                    catch
+                    {
+                        // Hata durumunda default değer kullan
+                    }
+
                     // Docker hatası olduğunda özel bir task kaydı oluşturup kullanıcıyı bilgilendirebiliriz
                     var errorTask = new Entities.Task
                     {
                         Id = Guid.NewGuid(),
                         UserId = request.UserId,
+                        UserFullName = errorUserFullName,
                         ServiceType = request.ServiceType,
                         ContainerId = "error",
                         Port = 0,

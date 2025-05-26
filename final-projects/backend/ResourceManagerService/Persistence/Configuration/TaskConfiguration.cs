@@ -14,6 +14,7 @@ namespace ResourceManagerService.Persistence.Configuration
             builder.Property(t => t.Port).IsRequired();
             builder.Property(t => t.StartTime).IsRequired();
             builder.Property(t => t.UserId).IsRequired();
+            builder.Property(t => t.UserFullName).HasMaxLength(200);
             
             builder.Property(t => t.Events)
                 .HasColumnType("jsonb")

@@ -1,0 +1,25 @@
+﻿
+
+StatusCode        : 200
+StatusDescription : OK
+Content           : {"success":true,"message":"User fetched","data":{"id":"ba50dfed-8016-4252-ba95-33f08
+                    f98a32e","username":"selim","email":"gt63selim@gmail.com","passwordHash":"$2a$11$kPK
+                    TdTxJxuekVrpwcP408O7pu023CJu1DUP...
+RawContent        : HTTP/1.1 200 OK
+                    Transfer-Encoding: chunked
+                    Content-Type: application/json; charset=utf-8
+                    Date: Mon, 26 May 2025 21:08:26 GMT
+                    Server: Kestrel
+                    
+                    {"success":true,"message":"User fetched","data":{"id...
+Forms             : {}
+Headers           : {[Transfer-Encoding, chunked], [Content-Type, application/json; charset=utf-8], [Dat
+                    e, Mon, 26 May 2025 21:08:26 GMT], [Server, Kestrel]}
+Images            : {}
+InputFields       : {}
+Links             : {}
+ParsedHtml        : mshtml.HTMLDocumentClass
+RawContentLength  : 853
+
+
+

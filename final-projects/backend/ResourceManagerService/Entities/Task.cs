@@ -8,6 +8,7 @@ namespace ResourceManagerService.Entities
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
+        public string UserFullName { get; set; } = string.Empty;
         public string ServiceType { get; set; }
         public string ContainerId { get; set; }
         public int Port { get; set; }

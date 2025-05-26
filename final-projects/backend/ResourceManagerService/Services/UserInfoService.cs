@@ -20,12 +20,23 @@ namespace ResourceManagerService.Services
         public async Task<(string Email, string FullName)> GetUserInfoAsync(Guid userId)
         {
             var url = $"{_identityServiceBaseUrl}/api/users/{userId}";
-            var response = await _httpClient.GetStringAsync(url);
-            var json = JObject.Parse(response);
-            var user = json["data"];
-            string email = user["email"]?.ToString() ?? string.Empty;
-            string fullname = user["username"]?.ToString() ?? user["email"]?.ToString() ?? "Unknown User";
-            return (email, fullname);
+            Console.WriteLine($"[UserInfoService] Fetching user info from URL: {url}");
+            try
+            {
+                var response = await _httpClient.GetStringAsync(url);
+                Console.WriteLine($"[UserInfoService] Response: {response}");
+                var json = JObject.Parse(response);
+                var user = json["data"];
+                string email = user["email"]?.ToString() ?? string.Empty;
+                string fullname = user["username"]?.ToString() ?? user["email"]?.ToString() ?? "Unknown User";
+                Console.WriteLine($"[UserInfoService] Parsed - Email: {email}, FullName: {fullname}");
+                return (email, fullname);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[UserInfoService] ERROR: {ex.Message}");
+                return ("error", $"ERROR: {ex.Message}");
+            }
         }
 
         public async Task<bool> IsUserAdminAsync(Guid userId)

@@ -41,7 +41,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddSingleton<UserInfoService>(sp =>
 {
     var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
-    var identityServiceBaseUrl = "http://identityservice:8080"; // Container adı ve port
+    var identityServiceBaseUrl = "http://localhost:5001"; // Localhost development için
     return new UserInfoService(httpClient, identityServiceBaseUrl);
 });
 

@@ -14,6 +14,7 @@ import {
   AccountCircle,
   Monitor as LogViewerIcon,
   MonitorHeart as PrometheusIcon,
+  Analytics as MetricsIcon,
 } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -55,6 +56,7 @@ const DashboardLayout = () => {
         ]
       },
       { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
+      { text: 'Metrics', icon: <MetricsIcon />, path: '/metrics' },
       { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
       { text: 'Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
     ] : [

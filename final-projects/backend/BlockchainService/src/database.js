@@ -88,13 +88,13 @@ async function initializeDatabase() {
     await pool.query("SET timezone TO 'Europe/Istanbul'");
     console.log("Timezone set to Europe/Istanbul");
 
-    // Mevcut tabloyu sil
-    await pool.query("DROP TABLE IF EXISTS metrics CASCADE");
-    console.log("Dropped existing metrics table");
+    // Mevcut tabloyu sil (sadece geliştirme aşamasında)
+    // await pool.query("DROP TABLE IF EXISTS metrics CASCADE");
+    // console.log("Dropped existing metrics table");
 
-    // Yeni tabloyu oluştur
+    // Yeni tabloyu oluştur (eğer yoksa)
     await pool.query(`
-      CREATE TABLE metrics (
+      CREATE TABLE IF NOT EXISTS metrics (
         id SERIAL PRIMARY KEY,
         user_email VARCHAR(255) NOT NULL,
         user_fullname VARCHAR(255),
@@ -108,11 +108,11 @@ async function initializeDatabase() {
         UNIQUE(container_id, created_at)
       );
 
-      CREATE INDEX idx_metrics_created_at ON metrics (created_at);
-      CREATE INDEX idx_metrics_container_id ON metrics (container_id);
-      CREATE INDEX idx_metrics_container_name ON metrics (container_name);
-      CREATE INDEX idx_metrics_user_email ON metrics (user_email);
-      CREATE INDEX idx_metrics_user_fullname ON metrics (user_fullname);
+      CREATE INDEX IF NOT EXISTS idx_metrics_created_at ON metrics (created_at);
+      CREATE INDEX IF NOT EXISTS idx_metrics_container_id ON metrics (container_id);
+      CREATE INDEX IF NOT EXISTS idx_metrics_container_name ON metrics (container_name);
+      CREATE INDEX IF NOT EXISTS idx_metrics_user_email ON metrics (user_email);
+      CREATE INDEX IF NOT EXISTS idx_metrics_user_fullname ON metrics (user_fullname);
     `);
     console.log("Created new metrics table with user_email column");
 
@@ -280,7 +280,7 @@ async function getAllMetrics(options = {}) {
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    const query = `
+    const sql = `
       SELECT * FROM metrics 
       ${whereClause}
       ORDER BY ${sortBy} ${sortOrder}
@@ -289,7 +289,7 @@ async function getAllMetrics(options = {}) {
 
     params.push(limit, offset);
 
-    const result = await query(query, params);
+    const result = await query(sql, params);
     const countResult = await query(
       `SELECT COUNT(*) as total FROM metrics ${whereClause}`,
       conditions.length > 0 ? params.slice(0, -2) : []
