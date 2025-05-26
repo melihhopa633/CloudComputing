@@ -89,6 +89,7 @@ const TasksPage = () => {
    const [availableServices, setAvailableServices] = useState([]);
    const [servicesLoading, setServicesLoading] = useState(true);
    const [servicesError, setServicesError] = useState(null);
+   const [stoppingTaskIds, setStoppingTaskIds] = useState([]);
 
    useEffect(() => {
       fetchTasks();
@@ -179,6 +180,8 @@ const TasksPage = () => {
    };
 
    const handleStopTask = async (taskId) => {
+      if (stoppingTaskIds.includes(taskId)) return; // Zaten işlemdeyse tekrar başlatma
+      setStoppingTaskIds(prev => [...prev, taskId]);
       try {
          const response = await taskService.deleteTask(taskId);
          if (response.success) {
@@ -186,6 +189,8 @@ const TasksPage = () => {
          }
       } catch (err) {
          setError('Failed to stop task');
+      } finally {
+         setStoppingTaskIds(prev => prev.filter(id => id !== taskId));
       }
    };
 
@@ -463,7 +468,6 @@ const TasksPage = () => {
                         {availableServices
                            .filter(service => allRunningServiceKeys.includes(service.key.toLowerCase()))
                            .filter(service => !activeServiceKeys.includes(service.key.toLowerCase()))
-                           .filter(service => !unavailableServiceKeys.includes(service.key.toLowerCase()))
                            .map(service => (
                               <Button
                                  key={service.key}
@@ -740,6 +744,7 @@ const TasksPage = () => {
                                                 mb: 1,
                                              }}
                                              onClick={() => handleStopTask(task.id)}
+                                             disabled={stoppingTaskIds.includes(task.id)}
                                           >
                                              STOP
                                           </Button>
