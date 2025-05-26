@@ -20,7 +20,7 @@ const CloudBlockchainIcon = () => (
     {/* Cloud outline */}
     <path d="M30 60 Q20 40 40 30 Q50 10 70 20 Q90 10 100 30 Q120 40 110 60 Q120 80 90 80 Q70 100 50 80 Q20 80 30 60 Z" stroke="url(#cloudGlow)" strokeWidth="3.5" fill="none" filter="url(#glow)" />
     {/* Blockchain cubes - tam ortada */}
-    <g filter="url(#glow)" transform="translate(0, 18)">
+    <g filter="url(#glow)" transform="translate(0, 8)">
       {/* Center cube */}
       <g>
         <polygon points="60,38 68,42 60,46 52,42" fill="#0a192f" stroke="#00BFFF" strokeWidth="2" />
