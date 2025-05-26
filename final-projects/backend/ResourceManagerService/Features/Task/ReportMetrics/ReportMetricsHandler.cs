@@ -27,8 +27,40 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
 
         public async Task<bool> Handle(ReportMetricsCommand request, CancellationToken cancellationToken)
         {
+            Console.WriteLine($"[ReportMetricsHandler] Starting metrics report for TaskId {request.Id}");
+            
             var task = await _dbContext.Tasks.FindAsync(new object[] { request.Id }, cancellationToken);
-            if (task == null) return false;
+            if (task == null) 
+            {
+                Console.WriteLine($"[ReportMetricsHandler] Task not found for TaskId {request.Id}");
+                return false;
+            }
+
+            Console.WriteLine($"[ReportMetricsHandler] Found task for UserId {task.UserId}");
+
+            // Admin kullanıcıları için metrics kaydetme
+            bool isAdmin = false;
+            try
+            {
+                Console.WriteLine($"[ReportMetricsHandler] Checking if user {task.UserId} is admin...");
+                isAdmin = await _userInfoService.IsUserAdminAsync(task.UserId);
+                Console.WriteLine($"[ReportMetricsHandler] Admin check result: {isAdmin}");
+                
+                if (isAdmin)
+                {
+                    Console.WriteLine($"[ReportMetricsHandler] User {task.UserId} is admin, skipping metrics recording for TaskId {task.Id}");
+                    return true; // Admin için başarılı döndür ama metrics kaydetme
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ReportMetricsHandler] Admin check EXCEPTION for UserId {task.UserId}: {ex.Message}");
+                Log.Error(ex, "[ReportMetricsHandler] Admin check error for UserId {UserId}", task.UserId);
+                // Hata durumunda güvenli tarafta kalıp metrics kaydetme
+                return true;
+            }
+
+            Console.WriteLine($"[ReportMetricsHandler] User {task.UserId} is not admin, proceeding with metrics recording for TaskId {task.Id}");
 
             // Container'ın RAM ve CPU kullanımını ölç
             string memoryUsage = "0";

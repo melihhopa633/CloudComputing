@@ -75,8 +75,20 @@ const UserRolesPage = () => {
             renderCell: (params) => (
                 <IconButton
                     onClick={() => handleDeleteUserRole(params.id)}
-                    color="error"
                     size="small"
+                    sx={{
+                        color: '#FF3366',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                            backgroundColor: 'rgba(255, 51, 102, 0.15)',
+                            transform: 'scale(1.2)',
+                            boxShadow: '0 0 15px rgba(255, 51, 102, 0.4)',
+                            color: '#FF1744',
+                        },
+                        '&:active': {
+                            transform: 'scale(0.95)',
+                        },
+                    }}
                 >
                     <DeleteIcon />
                 </IconButton>
@@ -99,7 +111,37 @@ const UserRolesPage = () => {
             backdrop: 'rgba(0, 0, 0, 0.7)',
             timer: 2000,
             timerProgressBar: true,
-            showConfirmButton: false
+            buttonsStyling: false,
+            confirmButtonText: 'OK',
+            width: '400px',
+            padding: '2rem',
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp'
+            },
+            html: `
+                <div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>
+                <style>
+                    .swal2-confirm {
+                        background: linear-gradient(45deg, #0066FF, #00B4FF) !important;
+                        border: none !important;
+                        color: white !important;
+                        padding: 10px 30px !important;
+                        font-size: 1rem !important;
+                        font-weight: 600 !important;
+                        border-radius: 4px !important;
+                        box-shadow: 0 0 15px rgba(0, 102, 255, 0.4) !important;
+                        transition: all 0.3s ease !important;
+                    }
+                    .swal2-confirm:hover {
+                        background: linear-gradient(45deg, #0055DD, #0099FF) !important;
+                        box-shadow: 0 0 20px rgba(0, 102, 255, 0.6) !important;
+                        transform: translateY(-2px) !important;
+                    }
+                </style>
+            `,
         });
     };
 
@@ -111,7 +153,32 @@ const UserRolesPage = () => {
             confirmButtonColor: '#0066FF',
             background: 'rgba(0, 20, 40, 0.95)',
             color: '#fff',
-            backdrop: 'rgba(0, 0, 0, 0.7)'
+            backdrop: 'rgba(0, 0, 0, 0.7)',
+            buttonsStyling: false,
+            confirmButtonText: 'OK',
+            width: '400px',
+            padding: '2rem',
+            html: `
+                <div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>
+                <style>
+                    .swal2-confirm {
+                        background: linear-gradient(45deg, #0066FF, #00B4FF) !important;
+                        border: none !important;
+                        color: white !important;
+                        padding: 10px 30px !important;
+                        font-size: 1rem !important;
+                        font-weight: 600 !important;
+                        border-radius: 4px !important;
+                        box-shadow: 0 0 15px rgba(0, 102, 255, 0.4) !important;
+                        transition: all 0.3s ease !important;
+                    }
+                    .swal2-confirm:hover {
+                        background: linear-gradient(45deg, #0055DD, #0099FF) !important;
+                        box-shadow: 0 0 20px rgba(0, 102, 255, 0.6) !important;
+                        transform: translateY(-2px) !important;
+                    }
+                </style>
+            `,
         });
     };
 
@@ -156,8 +223,57 @@ const UserRolesPage = () => {
             confirmButtonColor: '#0066FF',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Yes, remove it!',
+            cancelButtonText: 'Cancel',
             background: 'rgba(0, 20, 40, 0.95)',
-            color: '#fff'
+            color: '#fff',
+            backdrop: 'rgba(0, 0, 0, 0.7)',
+            buttonsStyling: false,
+            width: '400px',
+            padding: '2rem',
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp'
+            },
+            html: `
+                <div style="font-size: 1.1rem; margin-top: 1rem;">You won't be able to revert this!</div>
+                <style>
+                    .swal2-confirm {
+                        background: linear-gradient(45deg, #FF3366, #FF1744) !important;
+                        border: none !important;
+                        color: white !important;
+                        padding: 10px 30px !important;
+                        font-size: 1rem !important;
+                        font-weight: 600 !important;
+                        border-radius: 4px !important;
+                        box-shadow: 0 0 15px rgba(255, 51, 102, 0.4) !important;
+                        transition: all 0.3s ease !important;
+                        margin-right: 10px !important;
+                    }
+                    .swal2-confirm:hover {
+                        background: linear-gradient(45deg, #FF1744, #D32F2F) !important;
+                        box-shadow: 0 0 20px rgba(255, 51, 102, 0.6) !important;
+                        transform: translateY(-2px) !important;
+                    }
+                    .swal2-cancel {
+                        background: linear-gradient(45deg, #666, #888) !important;
+                        border: none !important;
+                        color: white !important;
+                        padding: 10px 30px !important;
+                        font-size: 1rem !important;
+                        font-weight: 600 !important;
+                        border-radius: 4px !important;
+                        box-shadow: 0 0 15px rgba(102, 102, 102, 0.4) !important;
+                        transition: all 0.3s ease !important;
+                    }
+                    .swal2-cancel:hover {
+                        background: linear-gradient(45deg, #888, #AAA) !important;
+                        box-shadow: 0 0 20px rgba(102, 102, 102, 0.6) !important;
+                        transform: translateY(-2px) !important;
+                    }
+                </style>
+            `,
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {

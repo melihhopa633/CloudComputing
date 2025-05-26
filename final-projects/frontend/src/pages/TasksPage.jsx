@@ -228,7 +228,8 @@ const TasksPage = () => {
    };
    const handleModalClose = async () => {
       // Metrics kaydını tetikle (asenkron - modal'ı bekletmez)
-      if (modalTaskId) {
+      // Sadece admin olmayan kullanıcılar için metrics gönder
+      if (modalTaskId && !isAdmin) {
          // Asenkron olarak gönder, modal'ı bekletme
          axios.post(`http://localhost:5002/api/report-metrics/${modalTaskId}`)
             .then(() => {
@@ -237,6 +238,8 @@ const TasksPage = () => {
             .catch((err) => {
                console.error('Failed to report metrics:', err);
             });
+      } else if (modalTaskId && isAdmin) {
+         console.log('Admin user - skipping metrics report');
       }
       
       // Modal'ı hemen kapat
