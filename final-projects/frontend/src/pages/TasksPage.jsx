@@ -107,9 +107,9 @@ const TasksPage = () => {
          setServicesError(null);
          try {
             // DockerService'deki tüm servisleri çek
-            const allServicesResp = await fetch('http://localhost:5002/api/services');
-            const allServicesData = await allServicesResp.json();
-            if (allServicesData.success) {
+               const allServicesResp = await fetch('http://localhost:5002/api/services');
+               const allServicesData = await allServicesResp.json();
+               if (allServicesData.success) {
                setAvailableServices(allServicesData.data);
             } else {
                setServicesError('Servis detayları alınamadı');
@@ -372,29 +372,29 @@ const TasksPage = () => {
                                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, justifyContent: 'space-between', height: '100%' }}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
                                        <Typography variant="h2" sx={{ fontWeight: 900, color: '#fff', letterSpacing: 0.5, textTransform: 'lowercase', fontSize: 48 }}>
-                                          {task.serviceType}
-                                       </Typography>
-                                       <img
-                                          src={LOGO_MAP[task.serviceType?.toLowerCase()] || DEFAULT_LOGO}
-                                          alt={task.serviceType + ' logo'}
+                                       {task.serviceType}
+                                    </Typography>
+                                    <img
+                                       src={LOGO_MAP[task.serviceType?.toLowerCase()] || DEFAULT_LOGO}
+                                       alt={task.serviceType + ' logo'}
                                           style={{ width: 100, height: 100, borderRadius: 22, background: '#18304a', objectFit: 'contain', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', cursor: 'pointer' }}
-                                          onClick={() => handleLogoClick(task)}
-                                       />
-                                    </Box>
-                                    <Chip
-                                       label={task.status}
-                                       sx={{
-                                          background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
-                                          color: '#fff',
-                                          fontWeight: 700,
+                                       onClick={() => handleLogoClick(task)}
+                                    />
+                                 </Box>
+                                 <Chip
+                                    label={task.status}
+                                    sx={{
+                                       background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
+                                       color: '#fff',
+                                       fontWeight: 700,
                                           fontSize: 28,
-                                          borderRadius: 3,
+                                       borderRadius: 3,
                                           px: 4,
                                           py: 2,
                                           mb: 3,
-                                          boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
-                                       }}
-                                    />
+                                       boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
+                                    }}
+                                 />
                                     <Typography variant="body1" sx={{ 
                                        color: '#e3f2fd', 
                                        fontWeight: 600, 
@@ -407,10 +407,10 @@ const TasksPage = () => {
                                        mb: 4
                                     }}>
                                        {SERVICE_DESCRIPTIONS[task.serviceType?.toLowerCase()] || 'Bu servis ile ilgili detaylı bilgiye sahip değilsiniz. Servis, bulut ortamında hızlı ve güvenli bir şekilde çalışır, kullanıcı dostu arayüzüyle kolayca erişim sağlar. Tüm verileriniz güvenli bir şekilde saklanır ve yönetilir.'}
-                                    </Typography>
-                                    <Button
-                                       variant="contained"
-                                       color="error"
+                                 </Typography>
+                                 <Button
+                                    variant="contained"
+                                    color="error"
                                        sx={{ 
                                           fontWeight: 700, 
                                           fontSize: 22, 
@@ -423,10 +423,10 @@ const TasksPage = () => {
                                           width: '100%',
                                           maxWidth: 340
                                        }}
-                                       onClick={() => handleStopTask(task.id)}
-                                    >
+                                    onClick={() => handleStopTask(task.id)}
+                                 >
                                        SERVISLERIMDEN ÇIKART
-                                    </Button>
+                                 </Button>
                                  </Box>
                               </Card>
                            </Grid>
@@ -636,11 +636,11 @@ const TasksPage = () => {
                   <Box sx={{ mt: 6 }} />
                   <Grid container spacing={4} alignItems="stretch">
                      {availableServices
-                        .slice()
-                        .sort((a, b) => {
+                           .slice()
+                           .sort((a, b) => {
                            const cmp = (a.key?.toLowerCase() || '').localeCompare(b.key?.toLowerCase() || '');
-                           return sortOrder === 'asc' ? cmp : -cmp;
-                        })
+                              return sortOrder === 'asc' ? cmp : -cmp;
+                           })
                         .map((service) => {
                            // O servisin aktif task'ı var mı?
                            const task = userTasks.find(
@@ -682,38 +682,38 @@ const TasksPage = () => {
                                        </Box>
                                        {task ? (
                                           <>
-                                             <Chip
-                                                label={task.status}
-                                                sx={{
-                                                   background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
-                                                   color: '#fff',
-                                                   fontWeight: 700,
-                                                   fontSize: 18,
-                                                   borderRadius: 3,
-                                                   px: 2.5,
-                                                   py: 0.5,
-                                                   mb: 2,
-                                                   boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
-                                                }}
-                                             />
-                                             <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500 }}>
-                                                <b>Started:</b> {formatDate(task.startTime)}
-                                             </Typography>
-                                             <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 700, mt: 2 }}>
-                                                Events:
-                                             </Typography>
-                                             {task.events && task.events.length > 0 && (
-                                                <Box>
-                                                   {task.events.map((event) => (
-                                                      <Typography
-                                                         key={event.id}
-                                                         variant="body2"
-                                                         sx={{ color: '#e3f2fd', fontWeight: 400 }}
-                                                      >
-                                                         {formatDate(event.timestamp)} - {event.type}: {event.details}
-                                                      </Typography>
-                                                   ))}
-                                                </Box>
+                                       <Chip
+                                          label={task.status}
+                                          sx={{
+                                             background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
+                                             color: '#fff',
+                                             fontWeight: 700,
+                                             fontSize: 18,
+                                             borderRadius: 3,
+                                             px: 2.5,
+                                             py: 0.5,
+                                             mb: 2,
+                                             boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
+                                          }}
+                                       />
+                                       <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500 }}>
+                                          <b>Started:</b> {formatDate(task.startTime)}
+                                       </Typography>
+                                       <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 700, mt: 2 }}>
+                                          Events:
+                                       </Typography>
+                                       {task.events && task.events.length > 0 && (
+                                          <Box>
+                                             {task.events.map((event) => (
+                                                <Typography
+                                                   key={event.id}
+                                                   variant="body2"
+                                                   sx={{ color: '#e3f2fd', fontWeight: 400 }}
+                                                >
+                                                   {formatDate(event.timestamp)} - {event.type}: {event.details}
+                                                </Typography>
+                                             ))}
+                                          </Box>
                                              )}
                                           </>
                                        ) : (
@@ -724,30 +724,30 @@ const TasksPage = () => {
                                     </CardContent>
                                     <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
                                        {task ? (
-                                          <Button
-                                             size="large"
-                                             sx={{
-                                                background: '#18304a',
-                                                color: '#e3f2fd',
-                                                fontWeight: 700,
-                                                fontSize: 20,
-                                                borderRadius: 2,
-                                                px: 6,
-                                                py: 1.5,
-                                                boxShadow: '0 2px 8px 0 rgba(0,0,0,0.18), 0 8px 32px 0 rgba(32,64,96,0.18)',
-                                                '&:hover': {
-                                                   background: '#2e8b6e',
-                                                   color: '#fff',
-                                                },
-                                                transition: 'background 0.2s, color 0.2s',
-                                                mt: 2,
-                                                mb: 1,
-                                             }}
-                                             onClick={() => handleStopTask(task.id)}
+                                       <Button
+                                          size="large"
+                                          sx={{
+                                             background: '#18304a',
+                                             color: '#e3f2fd',
+                                             fontWeight: 700,
+                                             fontSize: 20,
+                                             borderRadius: 2,
+                                             px: 6,
+                                             py: 1.5,
+                                             boxShadow: '0 2px 8px 0 rgba(0,0,0,0.18), 0 8px 32px 0 rgba(32,64,96,0.18)',
+                                             '&:hover': {
+                                                background: '#2e8b6e',
+                                                color: '#fff',
+                                             },
+                                             transition: 'background 0.2s, color 0.2s',
+                                             mt: 2,
+                                             mb: 1,
+                                          }}
+                                          onClick={() => handleStopTask(task.id)}
                                              disabled={stoppingTaskIds.includes(task.id)}
-                                          >
-                                             STOP
-                                          </Button>
+                                       >
+                                          STOP
+                                       </Button>
                                        ) : (
                                           <Button
                                              size="large"
