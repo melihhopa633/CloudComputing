@@ -1,6 +1,6 @@
 import React from 'react';
 import { ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import { Task as TaskIcon } from '@mui/icons-material';
+import { Assignment as TaskIcon } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const TaskSidebar = () => {

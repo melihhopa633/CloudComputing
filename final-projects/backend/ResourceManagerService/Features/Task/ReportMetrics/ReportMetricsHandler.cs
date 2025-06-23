@@ -150,6 +150,37 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
                     resp.EnsureSuccessStatusCode();
                     
                     Console.WriteLine($"[ReportMetricsHandler] Blockchain operation completed for TaskId {task.Id}");
+                    
+                    // 🧾 OTOMATIK FATURALAMA TETİKLEYİCİSİ - Task bittiğinde anlık fatura hesabı
+                    try
+                    {
+                        Console.WriteLine($"[ReportMetricsHandler] Triggering automatic billing calculation for user {userEmail}");
+                        
+                        var billingObj = new
+                        {
+                            user_email = userEmail,
+                            start_date = DateTime.UtcNow.AddDays(-30).ToString("yyyy-MM-ddTHH:mm:ss"), // Son 30 gün
+                            end_date = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss")
+                        };
+                        
+                        var billingContent = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(billingObj), System.Text.Encoding.UTF8, "application/json");
+                        var billingResp = await httpClient.PostAsync("http://billingservice:5003/api/billing/calculate", billingContent);
+                        
+                        if (billingResp.IsSuccessStatusCode)
+                        {
+                            var billingResult = await billingResp.Content.ReadAsStringAsync();
+                            Console.WriteLine($"[ReportMetricsHandler] ✅ Billing calculation completed for {userEmail}: {billingResult}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"[ReportMetricsHandler] ⚠️ Billing calculation failed for {userEmail}: {billingResp.StatusCode}");
+                        }
+                    }
+                    catch (Exception billingEx)
+                    {
+                        Console.WriteLine($"[ReportMetricsHandler] ⚠️ Billing calculation error for {userEmail}: {billingEx.Message}");
+                        // Billing hatası blockchain işlemini etkilemez
+                    }
                 }
                 catch (Exception ex)
                 {

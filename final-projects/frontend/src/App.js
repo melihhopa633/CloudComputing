@@ -17,6 +17,7 @@ import TasksPage from "./pages/TasksPage";
 import LogViewerSidebar from "./components/LogViewerSidebar";
 import Prometheus from "./pages/tasks/Prometheus";
 import MetricsPage from "./pages/MetricsPage";
+import BillingPage from "./pages/BillingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -97,6 +98,14 @@ function App() {
             element={
               <ProtectedRoute requireAdmin={true}>
                 <MetricsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="billing"
+            element={
+              <ProtectedRoute>
+                <BillingPage />
               </ProtectedRoute>
             }
           />
