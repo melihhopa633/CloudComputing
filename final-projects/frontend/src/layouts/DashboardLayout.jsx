@@ -41,9 +41,9 @@ const DashboardLayout = () => {
 
   const menuItems = [
     ...(isAdmin ? [
-      { text: '🏠 Dashboard', icon: <DashboardIcon />, path: '/' },
+      { text: ' Dashboard', icon: <DashboardIcon />, path: '/' },
       {
-        text: '👥 User Management',
+        text: ' User Management',
         icon: <PeopleIcon />,
         hasSubMenu: true,
         subItems: [
@@ -52,15 +52,14 @@ const DashboardLayout = () => {
           { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
         ]
       },
-      { text: '📊 Tasks', icon: <TaskIcon />, path: '/tasks' },
-      { text: '📈 Metrics', icon: <MetricsIcon />, path: '/metrics' },
-      { text: '💰 Billing & Invoices', icon: <BillingIcon />, path: '/billing' },
-      { text: '📝 Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
-      { text: '🔥 Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
+      { text: ' Tasks', icon: <TaskIcon />, path: '/tasks' },
+      { text: ' Metrics', icon: <MetricsIcon />, path: '/metrics' },
+      { text: ' Billing & Invoices', icon: <BillingIcon />, path: '/billing' },
+      { text: ' Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
+      { text: ' Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
     ] : [
-      { text: '🏠 Dashboard', icon: <DashboardIcon />, path: '/' },
-      { text: '📊 Tasks', icon: <TaskIcon />, path: '/tasks' },
-      { text: '💰 Billing & Invoices', icon: <BillingIcon />, path: '/billing' }
+      { text: ' Dashboard', icon: <DashboardIcon />, path: '/' },
+      { text: ' Tasks', icon: <TaskIcon />, path: '/tasks' }
     ]),
   ];
 

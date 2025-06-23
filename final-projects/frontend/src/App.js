@@ -104,7 +104,7 @@ function App() {
           <Route
             path="billing"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdmin={true}>
                 <BillingPage />
               </ProtectedRoute>
             }

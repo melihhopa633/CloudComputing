@@ -1,22 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, List, ListItem, ListItemIcon, ListItemText, ListItemButton, Typography } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Dashboard as DashboardIcon, People as PeopleIcon, Security as SecurityIcon, Assignment as AssignmentIcon, Computer as MonitorIcon, Receipt as ReceiptIcon, Analytics as MetricsIcon, AttachMoney as BillingIcon } from '@mui/icons-material';
+import { Dashboard as DashboardIcon, People as PeopleIcon, Security as SecurityIcon, Assignment as AssignmentIcon, Computer as MonitorIcon, Receipt as ReceiptIcon, Analytics as MetricsIcon, AttachMoney as BillingIcon, Task as TaskIcon } from '@mui/icons-material';
+import authService from '../../services/authService';
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [isAdmin, setIsAdmin] = useState(false);
 
-    const menuItems = [
-        { text: '🏠 Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-        { text: '👥 Users', icon: <PeopleIcon />, path: '/users' },
-        { text: '🔐 Roles', icon: <SecurityIcon />, path: '/roles' },
-        { text: '👤 User Roles', icon: <AssignmentIcon />, path: '/user-roles' },
-        { text: '📊 Tasks', icon: <AssignmentIcon />, path: '/tasks' },
-        { text: '📈 Metrics', icon: <MetricsIcon />, path: '/metrics' },
-        { text: '💰 Billing & Invoices', icon: <BillingIcon />, path: '/billing' },
-        { text: '📝 Log Viewer', icon: <MonitorIcon />, path: '/log-viewer' },
+    useEffect(() => {
+        // Check if user is admin when component mounts
+        setIsAdmin(authService.isAdmin());
+    }, []);
+
+    const allMenuItems = [
+        { text: ' Dashboard', icon: <DashboardIcon />, path: '/dashboard', adminOnly: false },
+        { text: ' Users', icon: <PeopleIcon />, path: '/users', adminOnly: true },
+        { text: ' Roles', icon: <SecurityIcon />, path: '/roles', adminOnly: true },
+        { text: ' User Roles', icon: <AssignmentIcon />, path: '/user-roles', adminOnly: true },
+        { text: ' Tasks', icon: <TaskIcon />, path: '/tasks', adminOnly: false },
+        { text: ' Metrics', icon: <MetricsIcon />, path: '/metrics', adminOnly: true },
+        { text: ' Billing & Invoices', icon: <BillingIcon />, path: '/billing', adminOnly: true },
+        { text: ' Log Viewer', icon: <MonitorIcon />, path: '/log-viewer', adminOnly: true },
     ];
+
+    // Filter menu items based on admin status
+    const menuItems = allMenuItems.filter(item => !item.adminOnly || isAdmin);
 
 
     return (
