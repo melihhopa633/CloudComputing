@@ -25,6 +25,7 @@ const authService = {
     localStorage.removeItem("username");
     localStorage.removeItem("email");
     localStorage.removeItem("roles");
+    localStorage.removeItem("userId");
   },
 
   isAdmin() {

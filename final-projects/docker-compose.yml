@@ -40,6 +40,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres_resource;Port=5432;Database=resource_db;Username=postgres;Password=postgres
       - Serilog__SeqServerUrl=http://seq:80
+      - IDENTITY_SERVICE_URL=http://identityservice:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
@@ -125,33 +126,18 @@ services:
       - app-network
 
   seq:
-    image: datalust/seq:2023.4
+    image: datalust/seq:latest
     container_name: seq
     environment:
       ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_ADMINPASSWORDHASH: "QFzkN8S8Y/VgqWlbw4HBXSpDlr9W8U6XgPkJlqPVQ/0llHl2S1/cVDV4xf8EFwJK"
-      SEQ_API_CANONICALURI: "http://seq:5341"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
     ports:
-      - "5341:5341"
+      - "5341:80"
     volumes:
       - seqdata:/data
     restart: unless-stopped
     networks:
       - app-network
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost:5341/",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
 
   docker_stats_exporter:
     image: wywywywy/docker_stats_exporter:latest
@@ -213,8 +199,7 @@ services:
       - app-network
 
   billingservice:
-    build:
-      context: ./backend/BillingService
+    build: ./backend/BillingService
     container_name: billingservice
     environment:
       - POSTGRES_HOST=postgres_blockchain
@@ -224,27 +209,12 @@ services:
       - POSTGRES_PASSWORD=blockchain
     ports:
       - "5003:5003"
-    volumes:
-      - billing_pdfs:/app/generated_invoices
     depends_on:
       postgres_blockchain:
         condition: service_healthy
     restart: unless-stopped
-    stop_grace_period: 10s
     networks:
       - app-network
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import requests; requests.get('http://localhost:5003/health')",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 5s
 
 networks:
   app-network:
@@ -256,4 +226,3 @@ volumes:
   pgdata_blockchain:
   seqdata:
   mysql_data:
-  billing_pdfs:

@@ -34,7 +34,29 @@ const CreateTask = () => {
    const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-         await taskService.createTask(formData);
+         const userId = localStorage.getItem('userId');
+         console.log('UserId from localStorage:', userId, 'Type:', typeof userId);
+
+         if (!userId || userId === 'null' || userId === 'undefined') {
+            setError('User not logged in. Please login again.');
+            return;
+         }
+
+         // GUID format validation (simple check)
+         const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+         if (!guidRegex.test(userId)) {
+            setError('Invalid user ID format. Please login again.');
+            console.error('Invalid userId format:', userId);
+            return;
+         }
+
+         const taskData = {
+            userId: userId,
+            serviceType: formData.serviceType,
+            containerId: '' // Bu backend tarafında doldurulacak
+         };
+         console.log('Task data being sent:', taskData);
+         await taskService.createTask(taskData);
          setSuccess(true);
          setError(null);
          // Reset form
@@ -49,7 +71,8 @@ const CreateTask = () => {
             window.parent.location.href = '/tasks';
          }, 2000);
       } catch (err) {
-         setError('Failed to create task');
+         console.error('Task creation error:', err);
+         setError('Failed to create task: ' + (err.response?.data?.message || err.message));
          setSuccess(false);
       }
    };

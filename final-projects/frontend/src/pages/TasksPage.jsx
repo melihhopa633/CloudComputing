@@ -85,6 +85,7 @@ const TasksPage = () => {
    const userEmail = localStorage.getItem('email');
    const [showSuccess, setShowSuccess] = useState(false);
    const userId = localStorage.getItem('userId');
+   console.log('DEBUG - TasksPage userId:', userId, 'Type:', typeof userId);
    const [showRequestScreen, setShowRequestScreen] = useState(false);
    const [availableServices, setAvailableServices] = useState([]);
    const [servicesLoading, setServicesLoading] = useState(true);
@@ -107,9 +108,9 @@ const TasksPage = () => {
          setServicesError(null);
          try {
             // DockerService'deki tüm servisleri çek
-               const allServicesResp = await fetch('http://localhost:5002/api/services');
-               const allServicesData = await allServicesResp.json();
-               if (allServicesData.success) {
+            const allServicesResp = await fetch('http://localhost:5002/api/services');
+            const allServicesData = await allServicesResp.json();
+            if (allServicesData.success) {
                setAvailableServices(allServicesData.data);
             } else {
                setServicesError('Servis detayları alınamadı');
@@ -167,15 +168,22 @@ const TasksPage = () => {
 
    const handleStartTask = async (serviceType) => {
       try {
+         if (!userId || userId === 'null' || userId === 'undefined') {
+            setError('User not logged in. Please login again.');
+            return;
+         }
+
          const response = await taskService.createTask({
             serviceType,
-            userId: userId // localStorage'dan alınan gerçek userId
+            userId: userId, // localStorage'dan alınan gerçek userId
+            containerId: '' // Bu backend tarafında doldurulacak
          });
          if (response.success) {
             await fetchTasks();
          }
       } catch (err) {
-         setError('Failed to start task');
+         console.error('Start task error:', err);
+         setError('Failed to start task: ' + (err.response?.data?.message || err.message));
       }
    };
 
@@ -244,7 +252,7 @@ const TasksPage = () => {
       } else if (modalTaskId && isAdmin) {
          console.log('Admin user - skipping metrics report');
       }
-      
+
       // Modal'ı hemen kapat
       setModalOpen(false);
       setModalUrl('');
@@ -271,8 +279,18 @@ const TasksPage = () => {
       setRequestSuccess("");
       try {
          console.log("userId:", userId);
+
+         if (!userId || userId === 'null' || userId === 'undefined') {
+            setRequestError('User not logged in. Please login again.');
+            return;
+         }
+
          for (const serviceType of selectedServices) {
-            await taskService.createTask({ serviceType, userId });
+            await taskService.createTask({
+               serviceType,
+               userId,
+               containerId: '' // Bu backend tarafında doldurulacak
+            });
          }
          setRequestSuccess("Servis(ler) başarıyla talep edildi!");
          setShowSuccess(true);
@@ -351,20 +369,20 @@ const TasksPage = () => {
                      <Grid container spacing={4} alignItems="stretch" justifyContent="center">
                         {userTasks.filter(task => task.status && !['deleted', 'error'].includes(task.status.toLowerCase())).map(task => (
                            <Grid item xs={12} sm={6} md={6} lg={6} key={task.id} sx={{ display: 'flex', minWidth: 0, justifyContent: 'center' }}>
-                              <Card sx={{ 
+                              <Card sx={{
                                  width: '100%',
                                  minWidth: 520,
                                  maxWidth: 520,
                                  minHeight: 520,
                                  maxHeight: 520,
-                                 display: 'flex', 
-                                 flexDirection: 'column', 
-                                 justifyContent: 'space-between', 
-                                 alignItems: 'center', 
-                                 background: '#18304a', 
-                                 color: '#fff', 
-                                 borderRadius: 4, 
-                                 boxShadow: '0 4px 16px 0 rgba(5,130,202,0.18)', 
+                                 display: 'flex',
+                                 flexDirection: 'column',
+                                 justifyContent: 'space-between',
+                                 alignItems: 'center',
+                                 background: '#18304a',
+                                 color: '#fff',
+                                 borderRadius: 4,
+                                 boxShadow: '0 4px 16px 0 rgba(5,130,202,0.18)',
                                  p: 6,
                                  flex: 1,
                                  mx: 'auto'
@@ -372,33 +390,33 @@ const TasksPage = () => {
                                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, justifyContent: 'space-between', height: '100%' }}>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
                                        <Typography variant="h2" sx={{ fontWeight: 900, color: '#fff', letterSpacing: 0.5, textTransform: 'lowercase', fontSize: 48 }}>
-                                       {task.serviceType}
-                                    </Typography>
-                                    <img
-                                       src={LOGO_MAP[task.serviceType?.toLowerCase()] || DEFAULT_LOGO}
-                                       alt={task.serviceType + ' logo'}
+                                          {task.serviceType}
+                                       </Typography>
+                                       <img
+                                          src={LOGO_MAP[task.serviceType?.toLowerCase()] || DEFAULT_LOGO}
+                                          alt={task.serviceType + ' logo'}
                                           style={{ width: 100, height: 100, borderRadius: 22, background: '#18304a', objectFit: 'contain', boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)', cursor: 'pointer' }}
-                                       onClick={() => handleLogoClick(task)}
-                                    />
-                                 </Box>
-                                 <Chip
-                                    label={task.status}
-                                    sx={{
-                                       background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
-                                       color: '#fff',
-                                       fontWeight: 700,
+                                          onClick={() => handleLogoClick(task)}
+                                       />
+                                    </Box>
+                                    <Chip
+                                       label={task.status}
+                                       sx={{
+                                          background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
+                                          color: '#fff',
+                                          fontWeight: 700,
                                           fontSize: 28,
-                                       borderRadius: 3,
+                                          borderRadius: 3,
                                           px: 4,
                                           py: 2,
                                           mb: 3,
-                                       boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
-                                    }}
-                                 />
-                                    <Typography variant="body1" sx={{ 
-                                       color: '#e3f2fd', 
-                                       fontWeight: 600, 
-                                       fontSize: 22, 
+                                          boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
+                                       }}
+                                    />
+                                    <Typography variant="body1" sx={{
+                                       color: '#e3f2fd',
+                                       fontWeight: 600,
+                                       fontSize: 22,
                                        textAlign: 'center',
                                        flex: 1,
                                        display: 'flex',
@@ -407,26 +425,26 @@ const TasksPage = () => {
                                        mb: 4
                                     }}>
                                        {SERVICE_DESCRIPTIONS[task.serviceType?.toLowerCase()] || 'Bu servis ile ilgili detaylı bilgiye sahip değilsiniz. Servis, bulut ortamında hızlı ve güvenli bir şekilde çalışır, kullanıcı dostu arayüzüyle kolayca erişim sağlar. Tüm verileriniz güvenli bir şekilde saklanır ve yönetilir.'}
-                                 </Typography>
-                                 <Button
-                                    variant="contained"
-                                    color="error"
-                                       sx={{ 
-                                          fontWeight: 700, 
-                                          fontSize: 22, 
-                                          borderRadius: 2, 
-                                          px: 6, 
-                                          py: 2, 
-                                          background: 'linear-gradient(90deg, #ca0505, #ca8205)', 
-                                          color: '#fff', 
+                                    </Typography>
+                                    <Button
+                                       variant="contained"
+                                       color="error"
+                                       sx={{
+                                          fontWeight: 700,
+                                          fontSize: 22,
+                                          borderRadius: 2,
+                                          px: 6,
+                                          py: 2,
+                                          background: 'linear-gradient(90deg, #ca0505, #ca8205)',
+                                          color: '#fff',
                                           boxShadow: '0 2px 8px 0 rgba(202,5,5,0.18)',
                                           width: '100%',
                                           maxWidth: 340
                                        }}
-                                    onClick={() => handleStopTask(task.id)}
-                                 >
+                                       onClick={() => handleStopTask(task.id)}
+                                    >
                                        SERVISLERIMDEN ÇIKART
-                                 </Button>
+                                    </Button>
                                  </Box>
                               </Card>
                            </Grid>
@@ -636,11 +654,11 @@ const TasksPage = () => {
                   <Box sx={{ mt: 6 }} />
                   <Grid container spacing={4} alignItems="stretch">
                      {availableServices
-                           .slice()
-                           .sort((a, b) => {
+                        .slice()
+                        .sort((a, b) => {
                            const cmp = (a.key?.toLowerCase() || '').localeCompare(b.key?.toLowerCase() || '');
-                              return sortOrder === 'asc' ? cmp : -cmp;
-                           })
+                           return sortOrder === 'asc' ? cmp : -cmp;
+                        })
                         .map((service) => {
                            // O servisin aktif task'ı var mı?
                            const task = userTasks.find(
@@ -682,38 +700,38 @@ const TasksPage = () => {
                                        </Box>
                                        {task ? (
                                           <>
-                                       <Chip
-                                          label={task.status}
-                                          sx={{
-                                             background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
-                                             color: '#fff',
-                                             fontWeight: 700,
-                                             fontSize: 18,
-                                             borderRadius: 3,
-                                             px: 2.5,
-                                             py: 0.5,
-                                             mb: 2,
-                                             boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
-                                          }}
-                                       />
-                                       <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500 }}>
-                                          <b>Started:</b> {formatDate(task.startTime)}
-                                       </Typography>
-                                       <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 700, mt: 2 }}>
-                                          Events:
-                                       </Typography>
-                                       {task.events && task.events.length > 0 && (
-                                          <Box>
-                                             {task.events.map((event) => (
-                                                <Typography
-                                                   key={event.id}
-                                                   variant="body2"
-                                                   sx={{ color: '#e3f2fd', fontWeight: 400 }}
-                                                >
-                                                   {formatDate(event.timestamp)} - {event.type}: {event.details}
-                                                </Typography>
-                                             ))}
-                                          </Box>
+                                             <Chip
+                                                label={task.status}
+                                                sx={{
+                                                   background: task.status === 'Running' ? '#2e8b6e' : '#ca8205',
+                                                   color: '#fff',
+                                                   fontWeight: 700,
+                                                   fontSize: 18,
+                                                   borderRadius: 3,
+                                                   px: 2.5,
+                                                   py: 0.5,
+                                                   mb: 2,
+                                                   boxShadow: '0 2px 8px 0 rgba(0,0,0,0.10)'
+                                                }}
+                                             />
+                                             <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 500 }}>
+                                                <b>Started:</b> {formatDate(task.startTime)}
+                                             </Typography>
+                                             <Typography variant="body1" sx={{ color: '#e3f2fd', fontWeight: 700, mt: 2 }}>
+                                                Events:
+                                             </Typography>
+                                             {task.events && task.events.length > 0 && (
+                                                <Box>
+                                                   {task.events.map((event) => (
+                                                      <Typography
+                                                         key={event.id}
+                                                         variant="body2"
+                                                         sx={{ color: '#e3f2fd', fontWeight: 400 }}
+                                                      >
+                                                         {formatDate(event.timestamp)} - {event.type}: {event.details}
+                                                      </Typography>
+                                                   ))}
+                                                </Box>
                                              )}
                                           </>
                                        ) : (
@@ -724,30 +742,30 @@ const TasksPage = () => {
                                     </CardContent>
                                     <CardActions sx={{ justifyContent: 'center', pb: 3 }}>
                                        {task ? (
-                                       <Button
-                                          size="large"
-                                          sx={{
-                                             background: '#18304a',
-                                             color: '#e3f2fd',
-                                             fontWeight: 700,
-                                             fontSize: 20,
-                                             borderRadius: 2,
-                                             px: 6,
-                                             py: 1.5,
-                                             boxShadow: '0 2px 8px 0 rgba(0,0,0,0.18), 0 8px 32px 0 rgba(32,64,96,0.18)',
-                                             '&:hover': {
-                                                background: '#2e8b6e',
-                                                color: '#fff',
-                                             },
-                                             transition: 'background 0.2s, color 0.2s',
-                                             mt: 2,
-                                             mb: 1,
-                                          }}
-                                          onClick={() => handleStopTask(task.id)}
+                                          <Button
+                                             size="large"
+                                             sx={{
+                                                background: '#18304a',
+                                                color: '#e3f2fd',
+                                                fontWeight: 700,
+                                                fontSize: 20,
+                                                borderRadius: 2,
+                                                px: 6,
+                                                py: 1.5,
+                                                boxShadow: '0 2px 8px 0 rgba(0,0,0,0.18), 0 8px 32px 0 rgba(32,64,96,0.18)',
+                                                '&:hover': {
+                                                   background: '#2e8b6e',
+                                                   color: '#fff',
+                                                },
+                                                transition: 'background 0.2s, color 0.2s',
+                                                mt: 2,
+                                                mb: 1,
+                                             }}
+                                             onClick={() => handleStopTask(task.id)}
                                              disabled={stoppingTaskIds.includes(task.id)}
-                                       >
-                                          STOP
-                                       </Button>
+                                          >
+                                             STOP
+                                          </Button>
                                        ) : (
                                           <Button
                                              size="large"

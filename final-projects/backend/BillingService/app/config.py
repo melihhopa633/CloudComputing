@@ -10,18 +10,19 @@ class Settings(BaseSettings):
     postgres_password: str = "blockchain"
     
     # Billing Configuration
-    cpu_rate_per_hour: float = 0.05  # $0.05 per CPU hour
-    memory_rate_per_gb_hour: float = 0.01  # $0.01 per GB hour
+    cpu_rate_per_hour: float = 2.50  # $2.50 per CPU hour
+    memory_rate_per_mb_hour: float = 0.0012  # $0.0012 per MB hour (1.20/1024)
+    base_service_charge: float = 5.00  # $5.00 base charge per service
     
     # API Configuration
     api_port: int = 5003
     api_host: str = "0.0.0.0"
     
     # PDF Configuration
-    company_name: str = "CloudChain Platform"
-    company_address: str = "123 Cloud Street, Tech City"
-    company_email: str = "billing@cloudchain.com"
-    company_phone: str = "+1 (555) 123-4567"
+    company_name: str = "DecentraCloud"
+    company_address: str = "123 Blockchain Avenue, Tech Valley"
+    company_email: str = "billing@decentracloud.com"
+    company_phone: str = "+1 (555) DECENTRA"
     
     class Config:
         env_file = ".env"

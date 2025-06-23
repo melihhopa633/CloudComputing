@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Drawer, AppBar, Toolbar, Typography, IconButton, List, ListItem, ListItemIcon, ListItemText, Collapse, useTheme } from '@mui/material';
+import { Box, Drawer, AppBar, Toolbar, IconButton, List, ListItem, ListItemIcon, ListItemText, Collapse } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Menu as MenuIcon,
   PeopleAlt as PeopleIcon,
   VpnKey as RoleIcon,
-  CloudUpload as FileIcon,
   Dashboard as DashboardIcon,
   Assignment as AssignmentIcon,
   Task as TaskIcon,
@@ -15,6 +13,7 @@ import {
   Monitor as LogViewerIcon,
   MonitorHeart as PrometheusIcon,
   Analytics as MetricsIcon,
+  AttachMoney as BillingIcon,
 } from '@mui/icons-material';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -23,11 +22,9 @@ import authService from '../services/authService';
 const drawerWidth = 240;
 
 const DashboardLayout = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openRoles, setOpenRoles] = useState(false);
   const [openUserManagement, setOpenUserManagement] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -44,9 +41,9 @@ const DashboardLayout = () => {
 
   const menuItems = [
     ...(isAdmin ? [
-      { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+      { text: '🏠 Dashboard', icon: <DashboardIcon />, path: '/' },
       {
-        text: 'User Management',
+        text: '👥 User Management',
         icon: <PeopleIcon />,
         hasSubMenu: true,
         subItems: [
@@ -55,13 +52,15 @@ const DashboardLayout = () => {
           { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
         ]
       },
-      { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
-      { text: 'Metrics', icon: <MetricsIcon />, path: '/metrics' },
-      { text: 'Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
-      { text: 'Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
+      { text: '📊 Tasks', icon: <TaskIcon />, path: '/tasks' },
+      { text: '📈 Metrics', icon: <MetricsIcon />, path: '/metrics' },
+      { text: '💰 Billing & Invoices', icon: <BillingIcon />, path: '/billing' },
+      { text: '📝 Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
+      { text: '🔥 Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
     ] : [
-      { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-      { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' }
+      { text: '🏠 Dashboard', icon: <DashboardIcon />, path: '/' },
+      { text: '📊 Tasks', icon: <TaskIcon />, path: '/tasks' },
+      { text: '💰 Billing & Invoices', icon: <BillingIcon />, path: '/billing' }
     ]),
   ];
 

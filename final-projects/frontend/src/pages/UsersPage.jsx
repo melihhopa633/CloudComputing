@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
 import { keyframes } from '@mui/system';
 import userService from '../services/userService';
@@ -21,7 +21,6 @@ const fadeIn = keyframes`
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -34,10 +33,6 @@ const UsersPage = () => {
     username: '',
     email: '',
   });
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const showSuccessAlert = (title, message) => {
     Swal.fire({
@@ -68,10 +63,6 @@ const UsersPage = () => {
         popup: 'animate__animated animate__fadeOutUp'
       },
       confirmButtonText: 'OK',
-      confirmButtonClass: 'swal2-confirm-button',
-      customClass: {
-        confirmButton: 'swal2-confirm-button',
-      },
       html: `
         <div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>
         <style>
@@ -115,11 +106,6 @@ const UsersPage = () => {
       width: '400px',
       padding: '2rem',
       titleText: title,
-      html: `<div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>`,
-      confirmButtonClass: 'swal2-confirm-button',
-      customClass: {
-        confirmButton: 'swal2-confirm-button',
-      },
       html: `
         <div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>
         <style>
@@ -144,7 +130,7 @@ const UsersPage = () => {
     });
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await userService.getAll();
@@ -152,14 +138,16 @@ const UsersPage = () => {
         ...user,
         createdAt: new Date(user.createdAt).toLocaleDateString()
       })));
-      setError(null);
     } catch (err) {
-      setError(err.message);
       showErrorAlert('Error', err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -190,10 +178,8 @@ const UsersPage = () => {
       await userService.create(newUser);
       await fetchUsers();
       handleCloseDialog();
-      setError(null);
       showSuccessAlert('Success', 'User created successfully');
     } catch (err) {
-      setError(err.message);
       showErrorAlert('Error', err.message);
     }
   };
@@ -208,10 +194,8 @@ const UsersPage = () => {
       await userService.update(selectedUser.id, updateData);
       await fetchUsers();
       handleCloseEditDialog();
-      setError(null);
       showSuccessAlert('Success', 'User updated successfully');
     } catch (err) {
-      setError(err.message);
       showErrorAlert('Error', err.message);
     }
   };
@@ -281,10 +265,8 @@ const UsersPage = () => {
         try {
           await userService.delete(id);
           await fetchUsers();
-          setError(null);
           showSuccessAlert('Deleted!', 'User has been deleted.');
         } catch (err) {
-          setError(err.message);
           showErrorAlert('Error', err.message);
         }
       }

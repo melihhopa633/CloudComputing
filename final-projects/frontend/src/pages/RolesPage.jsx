@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Paper } from '@mui/material';
 import { keyframes } from '@mui/system';
 import roleService from '../services/roleService';
@@ -21,7 +21,6 @@ const fadeIn = keyframes`
 const RolesPage = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
@@ -31,10 +30,6 @@ const RolesPage = () => {
   const [editRole, setEditRole] = useState({
     roleName: '',
   });
-
-  useEffect(() => {
-    fetchRoles();
-  }, []);
 
   const showSuccessAlert = (title, message) => {
     Swal.fire({
@@ -50,23 +45,18 @@ const RolesPage = () => {
       customClass: {
         title: 'swal2-title',
         content: 'swal2-content',
-        confirmButton: 'swal2-confirm',
+        confirmButton: 'swal2-confirm-button',
       },
       buttonsStyling: false,
       confirmButtonText: 'OK',
       width: '400px',
       padding: '2rem',
       titleText: title,
-      html: `<div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>`,
       showClass: {
         popup: 'animate__animated animate__fadeInDown'
       },
       hideClass: {
         popup: 'animate__animated animate__fadeOutUp'
-      },
-      confirmButtonClass: 'swal2-confirm-button',
-      customClass: {
-        confirmButton: 'swal2-confirm-button',
       },
       html: `
         <div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>
@@ -104,18 +94,13 @@ const RolesPage = () => {
       customClass: {
         title: 'swal2-title',
         content: 'swal2-content',
-        confirmButton: 'swal2-confirm',
+        confirmButton: 'swal2-confirm-button',
       },
       buttonsStyling: false,
       confirmButtonText: 'OK',
       width: '400px',
       padding: '2rem',
       titleText: title,
-      html: `<div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>`,
-      confirmButtonClass: 'swal2-confirm-button',
-      customClass: {
-        confirmButton: 'swal2-confirm-button',
-      },
       html: `
         <div style="font-size: 1.1rem; margin-top: 1rem;">${message}</div>
         <style>
@@ -140,19 +125,21 @@ const RolesPage = () => {
     });
   };
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       setLoading(true);
       const response = await roleService.getAll();
       setRoles(response.data);
-      setError(null);
     } catch (err) {
-      setError(err.message);
       showErrorAlert('Error', err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -182,10 +169,8 @@ const RolesPage = () => {
       await roleService.create(newRole);
       await fetchRoles();
       handleCloseDialog();
-      setError(null);
       showSuccessAlert('Success', 'Role created successfully');
     } catch (err) {
-      setError(err.message);
       showErrorAlert('Error', err.message);
     }
   };
@@ -199,10 +184,8 @@ const RolesPage = () => {
       await roleService.update(selectedRole.id, updateData);
       await fetchRoles();
       handleCloseEditDialog();
-      setError(null);
       showSuccessAlert('Success', 'Role updated successfully');
     } catch (err) {
-      setError(err.message);
       showErrorAlert('Error', err.message);
     }
   };
@@ -272,10 +255,8 @@ const RolesPage = () => {
         try {
           await roleService.delete(id);
           await fetchRoles();
-          setError(null);
           showSuccessAlert('Deleted!', 'Role has been deleted.');
         } catch (err) {
-          setError(err.message);
           showErrorAlert('Error', err.message);
         }
       }

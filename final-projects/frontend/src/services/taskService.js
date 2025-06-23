@@ -3,7 +3,7 @@ import axios from "axios";
 // Create axios instance with default config
 const api = axios.create({
   baseURL: "http://localhost:5002/api",
-  timeout: 5000,
+  timeout: 600000, // 60 saniye - Docker container başlatmak zaman alabilir
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

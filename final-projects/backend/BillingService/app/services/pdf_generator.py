@@ -175,7 +175,7 @@ class PDFGenerator:
         • Payment is due within 30 days of invoice date<br/>
         • Late payments may incur additional charges<br/>
         • For questions regarding this invoice, please contact: {}<br/><br/>
-        <i>Thank you for using CloudChain Platform!</i>
+        <i>Thank you for using DecentraCloud Platform!</i>
         """.format(settings.company_email)
         
         story.append(Paragraph(footer_text, styles['Normal']))

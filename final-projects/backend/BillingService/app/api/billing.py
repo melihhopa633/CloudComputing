@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 from datetime import datetime, timedelta
 from typing import List, Optional
 import os
+import httpx
 from app.models.billing import BillingRequest, InvoiceResponse, BillingSummary
 from app.services.database import db_service
 from app.services.billing_calculator import billing_calculator
@@ -15,13 +16,42 @@ router = APIRouter(prefix="/api/billing", tags=["billing"])
 
 @router.get("/users")
 async def get_users():
-    """Tüm kullanıcıları listele"""
+    """Tüm kullanıcıları IdentityService'den listele"""
     try:
-        users = db_service.get_all_users()
-        return {"success": True, "data": users}
+        # IdentityService'den kullanıcıları çek
+        async with httpx.AsyncClient() as client:
+            response = await client.get("http://identityservice:8080/api/users")
+            if response.status_code == 200:
+                identity_users = response.json()
+                # IdentityService'den gelen format: {"success": true, "data": [...]}
+                if isinstance(identity_users, dict) and "data" in identity_users:
+                    users = []
+                    for user in identity_users["data"]:
+                        users.append({
+                            "user_email": user.get("email", ""),
+                            "user_fullname": f"{user.get('username', '')}",
+                            "id": user.get("id", ""),
+                        })
+                    return {"success": True, "data": users}
+                else:
+                    # Fallback: metrics tablosundan çek
+                    logger.warning("IdentityService response format unexpected, falling back to metrics")
+                    users = db_service.get_all_users()
+                    return {"success": True, "data": users}
+            else:
+                # Fallback: metrics tablosundan çek
+                logger.warning(f"IdentityService returned {response.status_code}, falling back to metrics")
+                users = db_service.get_all_users()
+                return {"success": True, "data": users}
     except Exception as e:
-        logger.error(f"Error fetching users: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error fetching users from IdentityService: {e}")
+        # Fallback: metrics tablosundan çek
+        try:
+            users = db_service.get_all_users()
+            return {"success": True, "data": users}
+        except Exception as db_error:
+            logger.error(f"Error fetching users from database: {db_error}")
+            raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/calculate")
 async def calculate_billing(request: BillingRequest):
@@ -207,7 +237,7 @@ async def get_usage_summary(
                     "period_days": days,
                     "total_containers": 0,
                     "total_cpu_hours": 0.0,
-                    "total_memory_gb_hours": 0.0,
+                    "total_memory_mb_hours": 0.0,
                     "estimated_cost": 0.0
                 }
             }
@@ -217,7 +247,7 @@ async def get_usage_summary(
         # Tahmini maliyet
         estimated_cost = (
             usage['total_cpu_hours'] * billing_calculator.cpu_rate +
-            usage['total_memory_gb_hours'] * billing_calculator.memory_rate
+            usage['total_memory_mb_hours'] * billing_calculator.memory_rate
         ) * 1.18  # KDV dahil
         
         return {
@@ -227,7 +257,7 @@ async def get_usage_summary(
                 "period_days": days,
                 "total_containers": usage['total_containers'],
                 "total_cpu_hours": usage['total_cpu_hours'],
-                "total_memory_gb_hours": usage['total_memory_gb_hours'],
+                "total_memory_mb_hours": usage['total_memory_mb_hours'],
                 "estimated_cost": round(estimated_cost, 2),
                 "metrics_count": len(metrics)
             }
