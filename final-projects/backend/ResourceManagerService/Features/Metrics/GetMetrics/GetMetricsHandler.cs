@@ -5,7 +5,7 @@ using ResourceManagerService.Persistence;
 
 namespace ResourceManagerService.Features.Metrics.GetMetrics
 {
-    public class GetMetricsHandler : IRequestHandler<GetMetricsQuery, List<Metrics>>
+    public class GetMetricsHandler : IRequestHandler<GetMetricsQuery, List<Entities.Metrics>>
     {
         private readonly AppDbContext _dbContext;
 
@@ -14,7 +14,7 @@ namespace ResourceManagerService.Features.Metrics.GetMetrics
             _dbContext = dbContext;
         }
 
-        public async Task<List<Metrics>> Handle(GetMetricsQuery request, CancellationToken cancellationToken)
+        public async Task<List<Entities.Metrics>> Handle(GetMetricsQuery request, CancellationToken cancellationToken)
         {
             return await _dbContext.Metrics
                 .OrderByDescending(m => m.CreatedAt)
