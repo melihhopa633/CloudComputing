@@ -106,7 +106,7 @@ namespace ResourceManagerService.Features.Task.ReportMetrics
             // Metrics'i kendi veritabanına hemen kaydet
             try
             {
-                var metrics = new Metrics
+                var metrics = new Entities.Metrics
                 {
                     UserEmail = userEmail,
                     UserFullName = userFullName,

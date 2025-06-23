@@ -3,5 +3,5 @@ using ResourceManagerService.Entities;
  
 namespace ResourceManagerService.Features.Metrics.GetMetrics
 {
-    public record GetMetricsQuery() : IRequest<List<Metrics>>;
+    public record GetMetricsQuery() : IRequest<List<Entities.Metrics>>;
 } 

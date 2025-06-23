@@ -1,7 +1,7 @@
 using Carter;
 using MediatR;
 using ResourceManagerService.Features.Metrics.GetMetrics;
-using ResourceManagerService.Shared;
+using ResourceManagerService.Common;
 
 namespace ResourceManagerService.Features.Metrics
 {
