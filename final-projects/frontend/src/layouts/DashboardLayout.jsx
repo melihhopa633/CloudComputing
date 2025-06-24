@@ -1,31 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Drawer, AppBar, Toolbar, IconButton, List, ListItem, ListItemIcon, ListItemText, Collapse } from '@mui/material';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import {
-  PeopleAlt as PeopleIcon,
-  VpnKey as RoleIcon,
-  Dashboard as DashboardIcon,
-  Assignment as AssignmentIcon,
-  Task as TaskIcon,
-  ExpandLess,
-  ExpandMore,
-  AccountCircle,
-  Monitor as LogViewerIcon,
-  MonitorHeart as PrometheusIcon,
-  Analytics as MetricsIcon,
-  AttachMoney as BillingIcon,
-} from '@mui/icons-material';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
+import { Box, Drawer, AppBar, Toolbar, IconButton, Menu, MenuItem } from '@mui/material';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { AccountCircle } from '@mui/icons-material';
 import authService from '../services/authService';
+import Sidebar from '../components/Sidebar';
 
 const drawerWidth = 240;
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openUserManagement, setOpenUserManagement] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const openMenu = Boolean(anchorEl);
@@ -37,40 +21,6 @@ const DashboardLayout = () => {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };
-
-  const menuItems = [
-    ...(isAdmin ? [
-      { text: ' Dashboard', icon: <DashboardIcon />, path: '/' },
-      {
-        text: ' User Management',
-        icon: <PeopleIcon />,
-        hasSubMenu: true,
-        subItems: [
-          { text: 'Users', icon: <PeopleIcon />, path: '/users' },
-          { text: 'Roles', icon: <RoleIcon />, path: '/roles' },
-          { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
-        ]
-      },
-      { text: ' Tasks', icon: <TaskIcon />, path: '/tasks' },
-      { text: ' Metrics', icon: <MetricsIcon />, path: '/metrics' },
-      { text: ' Billing & Invoices', icon: <BillingIcon />, path: '/billing' },
-      { text: ' Log Viewer', icon: <LogViewerIcon />, path: '/log-viewer' },
-      { text: ' Prometheus', icon: <PrometheusIcon />, path: '/prometheus' }
-    ] : [
-      { text: ' Dashboard', icon: <DashboardIcon />, path: '/' },
-      { text: ' Tasks', icon: <TaskIcon />, path: '/tasks' }
-    ]),
-  ];
-
-  const handleMenuItemClick = (item) => {
-    if (item.hasSubMenu) {
-      if (item.text === 'User Management') {
-        setOpenUserManagement(!openUserManagement);
-      }
-    } else {
-      navigate(item.path);
-    }
   };
 
   const handleMenu = (event) => {
@@ -89,65 +39,6 @@ const DashboardLayout = () => {
 
   // Get username from localStorage
   const username = localStorage.getItem('username') || 'User';
-
-  const drawer = (
-    <div>
-      <List>
-        {menuItems.map((item) => (
-          <React.Fragment key={item.text}>
-            <ListItem
-              onClick={() => handleMenuItemClick(item)}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 102, 255, 0.1)',
-                  cursor: 'pointer'
-                },
-                bgcolor: location.pathname === item.path ||
-                  (item.text === 'User Management' &&
-                    (location.pathname.includes('/users') ||
-                      location.pathname.includes('/roles'))) ?
-                  'rgba(0, 102, 255, 0.2)' : 'transparent',
-              }}
-            >
-              <ListItemIcon sx={{ color: '#0066FF' }}>{item.icon}</ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                sx={{ color: '#fff' }}
-              />
-              {item.hasSubMenu && (
-                item.text === 'User Management' ?
-                  (openUserManagement ? <ExpandLess sx={{ color: '#fff' }} /> : <ExpandMore sx={{ color: '#fff' }} />) :
-                  null
-              )}
-            </ListItem>
-            {item.hasSubMenu && item.text === 'User Management' && openUserManagement && (
-              <Collapse in={openUserManagement} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {item.subItems.map((subItem) => (
-                    <ListItem
-                      key={subItem.text}
-                      onClick={() => navigate(subItem.path)}
-                      sx={{
-                        pl: 4,
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 102, 255, 0.1)',
-                          cursor: 'pointer'
-                        },
-                        bgcolor: location.pathname === subItem.path ? 'rgba(0, 102, 255, 0.2)' : 'transparent',
-                      }}
-                    >
-                      <ListItemIcon sx={{ color: '#0066FF' }}>{subItem.icon}</ListItemIcon>
-                      <ListItemText primary={subItem.text} sx={{ color: '#fff' }} />
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            )}
-          </React.Fragment>
-        ))}
-      </List>
-    </div>
-  );
 
   return (
     <Box sx={{ display: 'flex', bgcolor: '#001427', minHeight: '100vh' }}>
@@ -266,7 +157,7 @@ const DashboardLayout = () => {
             },
           }}
         >
-          {drawer}
+          <Sidebar />
         </Drawer>
         <Drawer
           variant="permanent"
@@ -281,7 +172,7 @@ const DashboardLayout = () => {
           }}
           open
         >
-          {drawer}
+          <Sidebar />
         </Drawer>
       </Box>
       <Box

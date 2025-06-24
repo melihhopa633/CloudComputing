@@ -2,38 +2,43 @@ import React, { useState } from 'react';
 import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Collapse } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
-import FolderIcon from '@mui/icons-material/Folder';
+import SecurityIcon from '@mui/icons-material/Security';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import MonitorIcon from '@mui/icons-material/Monitor';
+import TaskIcon from '@mui/icons-material/Task';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Link, useLocation } from 'react-router-dom';
-import LogViewerSidebar from './LogViewerSidebar';
-import MonitorIcon from '@mui/icons-material/Monitor';
 
 const Sidebar = () => {
-  const [openRoles, setOpenRoles] = useState(false);
+  const [openUserManagement, setOpenUserManagement] = useState(false);
   const location = useLocation();
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Users', icon: <PeopleIcon />, path: '/users' },
     {
-      text: 'Roles',
-      icon: <VpnKeyIcon />,
+      text: 'User Management',
+      icon: <PeopleIcon />,
       isDropdown: true,
       subItems: [
+        { text: 'Users', icon: <PeopleIcon />, path: '/users' },
+        { text: 'Roles', icon: <SecurityIcon />, path: '/roles' },
         { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
       ]
     },
+    { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
+    { text: 'Metrics', icon: <AnalyticsIcon />, path: '/metrics' },
+    { text: 'Billing & Invoices', icon: <AttachMoneyIcon />, path: '/billing' },
     { text: 'Log Viewer', icon: <MonitorIcon />, path: '/log-viewer' },
-
-
+    { text: 'Prometheus', icon: <TimelineIcon />, path: '/prometheus' },
   ];
 
   const handleClick = (item) => {
-    if (item.isDropdown) {
-      setOpenRoles(!openRoles);
+    if (item.isDropdown && item.text === 'User Management') {
+      setOpenUserManagement(!openUserManagement);
     }
   };
 
@@ -45,6 +50,12 @@ const Sidebar = () => {
         bgcolor: '#001427',
         color: 'white',
         borderRight: '1px solid rgba(255, 255, 255, 0.12)',
+        overflowY: 'auto',
+        '&::-webkit-scrollbar': {
+          display: 'none',
+        },
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
       }}
     >
       <Box sx={{ p: 3 }}>
@@ -66,7 +77,7 @@ const Sidebar = () => {
                 },
                 py: 1.5,
                 bgcolor: !item.isDropdown && location.pathname === item.path ? 'rgba(255, 255, 255, 0.12)' :
-                  item.isDropdown && location.pathname.includes('/roles') ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
+                  item.isDropdown && (location.pathname.includes('/users') || location.pathname.includes('/roles')) ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
                 cursor: 'pointer',
               }}
             >
@@ -74,10 +85,10 @@ const Sidebar = () => {
                 {item.icon}
               </ListItemIcon>
               <ListItemText primary={item.text} />
-              {item.isDropdown && (openRoles ? <ExpandLess /> : <ExpandMore />)}
+              {item.isDropdown && item.text === 'User Management' && (openUserManagement ? <ExpandLess /> : <ExpandMore />)}
             </ListItem>
-            {item.isDropdown && (
-              <Collapse in={openRoles} timeout="auto" unmountOnExit>
+            {item.isDropdown && item.text === 'User Management' && (
+              <Collapse in={openUserManagement} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   {item.subItems.map((subItem) => (
                     <ListItem
@@ -106,10 +117,6 @@ const Sidebar = () => {
           </React.Fragment>
         ))}
       </List>
-      {/* SEQ Logları Göster butonu ve iframe alanı */}
-      <Box sx={{ px: 2, mt: 2 }}>
-        <LogViewerSidebar />
-      </Box>
     </Box>
   );
 };
