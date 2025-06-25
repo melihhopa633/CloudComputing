@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Collapse } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
@@ -12,13 +12,21 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { Link, useLocation } from 'react-router-dom';
+import authService from '../services/authService';
 
 const Sidebar = () => {
   const [openUserManagement, setOpenUserManagement] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
 
-  const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+  useEffect(() => {
+    // Check if user is admin when component mounts
+    setIsAdmin(authService.isAdmin());
+  }, []);
+
+  // Admin can see all menus
+  const adminMenuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     {
       text: 'User Management',
       icon: <PeopleIcon />,
@@ -26,7 +34,7 @@ const Sidebar = () => {
       subItems: [
         { text: 'Users', icon: <PeopleIcon />, path: '/users' },
         { text: 'Roles', icon: <SecurityIcon />, path: '/roles' },
-        { text: 'User Roles', icon: <AssignmentIcon />, path: '/roles/user-roles' }
+        { text: 'User Roles', icon: <AssignmentIcon />, path: '/user-roles' }
       ]
     },
     { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
@@ -35,6 +43,15 @@ const Sidebar = () => {
     { text: 'Log Viewer', icon: <MonitorIcon />, path: '/log-viewer' },
     { text: 'Prometheus', icon: <TimelineIcon />, path: '/prometheus' },
   ];
+
+  // Normal users can only see limited menus
+  const userMenuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
+  ];
+
+  // Choose menu items based on user role
+  const menuItems = isAdmin ? adminMenuItems : userMenuItems;
 
   const handleClick = (item) => {
     if (item.isDropdown && item.text === 'User Management') {
@@ -60,7 +77,7 @@ const Sidebar = () => {
     >
       <Box sx={{ p: 3 }}>
         <Typography variant="h6" component="h1">
-          Admin Dashboard
+          {isAdmin ? 'Admin Dashboard' : 'User Dashboard'}
         </Typography>
       </Box>
       <List>
